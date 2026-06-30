@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
+<title>Login — Teacher Records System</title>
+<style>
+:root {
+  --navy:#0C1E3E; --navy-mid:#162D52;
+  --blue:#1A52C4; --blue-hover:#143FA0; --blue-light:#EBF0FD;
+  --gold:#D4960A; --gold-light:#FFF8E6;
+  --bg:#EEF1F6; --surface:#FFFFFF; --surface-2:#F7F9FC;
+  --border:#DDE3EE; --border-2:#C8D1E0;
+  --text-1:#0F1C2E; --text-2:#4A5568; --text-3:#8A96A8;
+  --red:#C8291A; --red-light:#FEF2F2;
+  --green:#1A8A5A; --green-light:#F0FDF5;
+  --radius-sm:8px; --radius-md:12px; --radius-lg:18px; --radius-xl:24px;
+  --shadow-md:0 4px 16px rgba(12,30,62,.12),0 1px 4px rgba(12,30,62,.08);
+  --shadow-lg:0 24px 64px rgba(12,30,62,.18),0 8px 24px rgba(12,30,62,.10);
+  --font:'Segoe UI Variable','Segoe UI',system-ui,-apple-system,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:var(--font);
+  background: var(--navy);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(26,82,196,.35) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(212,150,10,.2) 0%, transparent 50%),
+    radial-gradient(circle, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 24px 24px;
+  display:flex; align-items:center; justify-content:center;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  -webkit-app-region: drag;
+}
+
+.icon{display:inline-block;width:16px;height:16px;flex-shrink:0;vertical-align:middle;}
+.icon-sm{width:14px;height:14px;} .icon-md{width:20px;height:20px;} .icon-lg{width:24px;height:24px;}
+
+/* ── CARD ───────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+  animation: card-in .35s cubic-bezier(.22,.68,0,1.1);
+  -webkit-app-region: no-drag;
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(20px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── CARD HEADER ────────────────────────────── */
+.card-header {
+  background: var(--navy);
+  background-image: radial-gradient(circle, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  padding: 2rem 2rem 1.75rem;
+  text-align: center;
+  position: relative;
+}
+.app-icon {
+  width: 68px; height: 68px;
+  background: linear-gradient(135deg, rgba(26,82,196,.8), rgba(212,150,10,.7));
+  border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.125rem;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.15);
+}
+.app-title {
+  font-size: 20px;
+  font-weight: 750;
+  color: #fff;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+.app-subtitle {
+  font-size: 12.5px;
+  color: rgba(255,255,255,.45);
+  margin-top: 4px;
+  letter-spacing: .01em;
+}
+
+/* ── CARD BODY ──────────────────────────────── */
+.card-body { padding: 1.75rem 2rem; }
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── FORM ───────────────────────────────────── */
+.form-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin-bottom: 4px;
+  letter-spacing: -.01em;
+}
+.form-subtitle {
+  font-size: 12.5px;
+  color: var(--text-3);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.field { margin-bottom: 1.125rem; }
+.field label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  letter-spacing: .01em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+.input-wrap { position: relative; }
+.input-wrap input {
+  width: 100%;
+  height: 44px;
+  padding: 0 44px 0 13px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text-1);
+  background: var(--surface-2);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+.input-wrap input:focus {
+  border-color: var(--blue);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(26,82,196,.12);
+}
+.input-wrap input.error {
+  border-color: var(--red);
+  background: var(--red-light);
+  box-shadow: 0 0 0 3px rgba(200,41,26,.1);
+}
+.input-wrap input::placeholder { color: var(--text-3); font-size: 13.5px; }
+
+.eye-btn {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-3); transition: color .15s;
+}
+.eye-btn:hover { color: var(--text-1); }
+
+/* ── ERROR / SUCCESS MESSAGES ───────────────── */
+.msg {
+  display: none;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+.msg.show { display: flex; }
+.msg.error {
+  background: var(--red-light);
+  border: 1px solid rgba(200,41,26,.2);
+  color: var(--red);
+}
+.msg.success {
+  background: var(--green-light);
+  border: 1px solid rgba(26,138,90,.2);
+  color: var(--green);
+}
+.msg.info {
+  background: var(--blue-light);
+  border: 1px solid rgba(26,82,196,.2);
+  color: var(--blue);
+}
+
+/* ── BUTTONS ────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  width: 100%; height: 44px;
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; font-family: var(--font);
+  cursor: pointer; border: none;
+  transition: background .15s, transform .08s, box-shadow .15s;
+  letter-spacing: .01em;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(26,82,196,.35);
+}
+.btn-primary:hover { background: var(--blue-hover); box-shadow: 0 4px 12px rgba(26,82,196,.4); }
+.btn-primary:disabled {
+  background: #94A3B8; box-shadow: none; cursor: not-allowed; transform: none;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-3);
+  border: 1.5px solid var(--border);
+  height: 38px; font-size: 13px; font-weight: 500;
+}
+.btn-ghost:hover { background: var(--surface-2); color: var(--text-2); border-color: var(--border-2); }
+
+.btn-link {
+  background: none; border: none; padding: 0;
+  font-size: 12.5px; font-weight: 600; color: var(--blue);
+  cursor: pointer; font-family: var(--font);
+  display: inline;
+}
+.btn-link:hover { color: var(--blue-hover); text-decoration: underline; }
+
+/* ── DIVIDER ────────────────────────────────── */
+.divider {
+  height: 1px; background: var(--border);
+  margin: 1.25rem 0;
+}
+
+/* ── FOOTER ─────────────────────────────────── */
+.card-footer {
+  padding: .875rem 2rem 1.25rem;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* ── STRENGTH METER ─────────────────────────── */
+.strength-wrap { margin-top: 6px; }
+.strength-bar-bg {
+  height: 4px; background: var(--border); border-radius: 100px; overflow: hidden;
+}
+.strength-bar {
+  height: 100%; border-radius: 100px;
+  width: 0; transition: width .3s, background .3s;
+}
+.strength-label {
+  font-size: 11px; font-weight: 600; margin-top: 4px;
+  color: var(--text-3); transition: color .3s;
+}
+</style>
+</head>
+<body>
+
+<!-- SVG Icons -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="ico-records" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+  <symbol id="ico-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ico-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
+  <symbol id="ico-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="ico-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="ico-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></symbol>
+  <symbol id="ico-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+  <symbol id="ico-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+</svg>
+
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="card-header">
+    <div class="app-icon">
+      <img src="../assets/logo.png" alt="TeacherOS" style="width:46px;height:46px;object-fit:contain;">
+    </div>
+    <div class="app-title">TeacherOS</div>
+    <div class="app-subtitle">DepEd — Cuartero District</div>
+  </div>
+
+  <div class="card-body">
+
+    <!-- ── SCREEN 1: LOGIN ──────────────────────── -->
+    <div class="screen active" id="screen-login">
+      <div class="form-title">Welcome back</div>
+      <div class="form-subtitle">Enter your password to access the system.</div>
+
+      <div class="msg error" id="login-error">
+        <svg class="icon icon-sm"><use href="#ico-alert"/></svg>
+        <span id="login-error-msg">Incorrect password. Please try again.</span>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="login-pass" placeholder="Enter your password"
+            onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="eye-btn" type="button" onclick="toggleEye('login-pass', this)">
+            <svg class="icon icon-sm"><use href="#ico-eye"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="login-btn" onclick="doLogin()">
+        <svg class="icon"><use href="#ico-lock"/></svg>
+        Sign In
+      </button>
+
+      <div class="divider"></div>
+      <div style="text-align:center;font-size:12.5px;color:var(--text-3);">
+        Forgot your password?
+        <button class="btn-link" onclick="showScreen('screen-reset')">Reset it</button>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 2: FIRST-TIME SETUP ──────────── -->
+    <div class="screen" id="screen-setup">
+      <div class="form-title">Create your password</div>
+      <div class="form-subtitle">First time setup — create a password to secure access to this system.</div>
+
+      <div class="msg info show" style="margin-bottom:1rem;">
+        <svg class="icon icon-sm"><use href="#ico-shield"/></svg>
+        Choose a strong password you'll remember.
+      </div>
+
+      <div class="field">
+        <label>New Password</label>
+        <div class="input-wrap">
+          <input type="password" id="setup-pass1" placeholder="Create a password" oninput="checkStrength(this.value)">
+          <button class="eye-btn" type="button" onclick="toggleEye('setup-pass1', this)">
+            <svg class="icon icon-sm"><use href="#ico-eye"/></svg>
+          </button>
+        </div>
+        <div class="strength-wrap">
+          <div class="strength-bar-bg"><div class="strength-bar" id="strength-bar"></div></div>
+          <div class="strength-label" id="strength-label"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <div class="input-wrap">
+          <input type="password" id="setup-pass2" placeholder="Repeat your password"
+            onkeydown="if(event.key==='Enter')doSetup()">
+          <button class="eye-btn" type="button" onclick="toggleEye('setup-pass2', this)">
+            <svg class="icon icon-sm"><use href="#ico-eye"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="msg error" id="setup-error">
+        <svg class="icon icon-sm"><use href="#ico-alert"/></svg>
+        <span id="setup-error-msg">Passwords do not match.</span>
+      </div>
+
+      <button class="btn btn-primary" onclick="doSetup()">
+        <svg class="icon"><use href="#ico-check"/></svg>
+        Create Password &amp; Sign In
+      </button>
+    </div>
+
+    <!-- ── SCREEN 3: CHANGE PASSWORD ───────────── -->
+    <div class="screen" id="screen-change">
+      <div class="form-title">Change Password</div>
+      <div class="form-subtitle">Enter your current password, then choose a new one.</div>
+
+      <div class="field">
+        <label>Current Password</label>
+        <div class="input-wrap">
+          <input type="password" id="chg-old" placeholder="Current password">
+          <button class="eye-btn" type="button" onclick="toggleEye('chg-old', this)">
+            <svg class="icon icon-sm"><use href="#ico-eye"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <label>New Password</label>
+        <div class="input-wrap">
+          <input type="password" id="chg-new1" placeholder="New password" oninput="checkStrength2(this.value)">
+          <button class="eye-btn" type="button" onclick="toggleEye('chg-new1', this)">
+            <svg class="icon icon-sm"><use href="#ico-eye"/></svg>
+          </button>
+        </div>
+        <div class="strength-wrap">
+          <div class="strength-bar-bg"><div class="strength-bar" id="strength-bar2"></div></div>
+          <div class="strength-label" id="strength-label2"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Confirm New Password</label>
+        <div class="input-wrap">
+          <input type="password" id="chg-new2" placeholder="Repeat new password"
+            onkeydown="if(event.key==='Enter')doChange()">
+          <button class="eye-btn" type="button" onclick="toggleEye('chg-new2', this)">
+            <svg class="icon icon-sm"><use href="#ico-eye"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="msg error" id="chg-error">
+        <svg class="icon icon-sm"><use href="#ico-alert"/></svg>
+        <span id="chg-error-msg">Incorrect current password.</span>
+      </div>
+      <div class="msg success" id="chg-success">
+        <svg class="icon icon-sm"><use href="#ico-check"/></svg>
+        Password changed successfully!
+      </div>
+
+      <button class="btn btn-primary" onclick="doChange()" style="margin-bottom:.75rem;">
+        <svg class="icon"><use href="#ico-key"/></svg>
+        Update Password
+      </button>
+      <button class="btn btn-ghost" onclick="showScreen('screen-login')">← Back to Login</button>
+    </div>
+
+    <!-- ── SCREEN 4: RESET (admin bypass) ──────── -->
+    <div class="screen" id="screen-reset">
+      <div class="form-title">Reset Password</div>
+      <div class="form-subtitle">Enter the admin reset key to create a new password.</div>
+
+      <div class="field">
+        <label>Reset Key</label>
+        <div class="input-wrap">
+          <input type="password" id="reset-key" placeholder="Enter reset key">
+          <button class="eye-btn" type="button" onclick="toggleEye('reset-key', this)">
+            <svg class="icon icon-sm"><use href="#ico-eye"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <label>New Password</label>
+        <div class="input-wrap">
+          <input type="password" id="reset-pass1" placeholder="New password">
+          <button class="eye-btn" type="button" onclick="toggleEye('reset-pass1', this)">
+            <svg class="icon icon-sm"><use href="#ico-eye"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <div class="input-wrap">
+          <input type="password" id="reset-pass2" placeholder="Repeat new password"
+            onkeydown="if(event.key==='Enter')doReset()">
+          <button class="eye-btn" type="button" onclick="toggleEye('reset-pass2', this)">
+            <svg class="icon icon-sm"><use href="#ico-eye"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="msg error" id="reset-error">
+        <svg class="icon icon-sm"><use href="#ico-alert"/></svg>
+        <span id="reset-error-msg">Invalid reset key.</span>
+      </div>
+      <div class="msg success" id="reset-success">
+        <svg class="icon icon-sm"><use href="#ico-check"/></svg>
+        Password reset! Redirecting to login…
+      </div>
+
+      <button class="btn btn-primary" onclick="doReset()" style="margin-bottom:.75rem;">Reset Password</button>
+      <button class="btn btn-ghost" onclick="showScreen('screen-login')">← Back to Login</button>
+    </div>
+
+  </div><!-- /card-body -->
+
+  <div class="card-footer">
+    <svg class="icon icon-sm" style="color:var(--text-3);margin-right:4px;"><use href="#ico-shield"/></svg>
+    Secured · Data stored locally on this device
+  </div>
+
+</div><!-- /card -->
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // Hide all messages
+  document.querySelectorAll('.msg').forEach(m => m.classList.remove('show'));
+}
+
+function toggleEye(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isPass = input.type === 'password';
+  input.type = isPass ? 'text' : 'password';
+  btn.innerHTML = isPass
+    ? '<svg class="icon icon-sm"><use href="#ico-eye-off"/></svg>'
+    : '<svg class="icon icon-sm"><use href="#ico-eye"/></svg>';
+}
+
+// ── Password strength ──────────────────────────
+function evalStrength(pw) {
+  let score = 0;
+  if (pw.length >= 8)  score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  return score;
+}
+
+function renderStrength(score, barId, labelId) {
+  const bar   = document.getElementById(barId);
+  const label = document.getElementById(labelId);
+  const levels = [
+    {w:'20%', bg:'#EF4444', text:'Too short'},
+    {w:'40%', bg:'#F97316', text:'Weak'},
+    {w:'60%', bg:'#EAB308', text:'Fair'},
+    {w:'80%', bg:'#22C55E', text:'Good'},
+    {w:'100%',bg:'#16A34A', text:'Strong'},
+  ];
+  const l = levels[Math.max(0, score - 1)] || levels[0];
+  bar.style.width = score > 0 ? l.w : '0';
+  bar.style.background = l.bg;
+  label.style.color = l.bg;
+  label.textContent = score > 0 ? l.text : '';
+}
+
+function checkStrength(pw)  { renderStrength(evalStrength(pw), 'strength-bar',  'strength-label'); }
+function checkStrength2(pw) { renderStrength(evalStrength(pw), 'strength-bar2', 'strength-label2'); }
+
+// ── Login ─────────────────────────────────────
+async function doLogin() {
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  const input = document.getElementById('login-pass');
+
+  if (!pass) { input.classList.add('error'); return; }
+  input.classList.remove('error');
+
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.innerHTML = 'Signing in…';
+
+  try {
+    const result = await window.api.authLogin(pass);
+    if (result.success) {
+      btn.innerHTML = '<svg class="icon"><use href="#ico-check"/></svg> Success!';
+      setTimeout(() => window.api.authNavigate('dashboard.html'), 400);
+    } else {
+      input.classList.add('error');
+      errEl.querySelector('#login-error-msg').textContent = result.error || 'Incorrect password.';
+      errEl.classList.add('show');
+      btn.disabled = false;
+      btn.innerHTML = '<svg class="icon"><use href="#ico-lock"/></svg> Sign In';
+      setTimeout(() => { input.classList.remove('error'); }, 1800);
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg class="icon"><use href="#ico-lock"/></svg> Sign In';
+  }
+}
+
+// ── Setup ─────────────────────────────────────
+async function doSetup() {
+  const p1 = document.getElementById('setup-pass1').value;
+  const p2 = document.getElementById('setup-pass2').value;
+  const errEl = document.getElementById('setup-error');
+
+  if (!p1 || p1.length < 6) {
+    errEl.querySelector('#setup-error-msg').textContent = 'Password must be at least 6 characters.';
+    errEl.classList.add('show'); return;
+  }
+  if (p1 !== p2) {
+    errEl.querySelector('#setup-error-msg').textContent = 'Passwords do not match.';
+    errEl.classList.add('show'); return;
+  }
+  errEl.classList.remove('show');
+
+  const result = await window.api.authSetup(p1);
+  if (result.success) {
+    setTimeout(() => window.api.authNavigate('dashboard.html'), 300);
+  }
+}
+
+// ── Change password ────────────────────────────
+async function doChange() {
+  const old  = document.getElementById('chg-old').value;
+  const new1 = document.getElementById('chg-new1').value;
+  const new2 = document.getElementById('chg-new2').value;
+  const errEl = document.getElementById('chg-error');
+  const okEl  = document.getElementById('chg-success');
+
+  errEl.classList.remove('show');
+  okEl.classList.remove('show');
+
+  if (!old || !new1 || !new2) { errEl.querySelector('#chg-error-msg').textContent='All fields are required.'; errEl.classList.add('show'); return; }
+  if (new1 !== new2)           { errEl.querySelector('#chg-error-msg').textContent='New passwords do not match.'; errEl.classList.add('show'); return; }
+  if (new1.length < 6)         { errEl.querySelector('#chg-error-msg').textContent='Password must be at least 6 characters.'; errEl.classList.add('show'); return; }
+
+  const result = await window.api.authChangePassword(old, new1);
+  if (result.success) {
+    okEl.classList.add('show');
+    setTimeout(() => showScreen('screen-login'), 1800);
+  } else {
+    errEl.querySelector('#chg-error-msg').textContent = result.error || 'Incorrect current password.';
+    errEl.classList.add('show');
+  }
+}
+
+// ── Reset ─────────────────────────────────────
+async function doReset() {
+  const key  = document.getElementById('reset-key').value;
+  const new1 = document.getElementById('reset-pass1').value;
+  const new2 = document.getElementById('reset-pass2').value;
+  const errEl = document.getElementById('reset-error');
+  const okEl  = document.getElementById('reset-success');
+
+  errEl.classList.remove('show'); okEl.classList.remove('show');
+
+  if (!key || !new1 || !new2) { errEl.querySelector('#reset-error-msg').textContent='All fields are required.'; errEl.classList.add('show'); return; }
+  if (new1 !== new2)           { errEl.querySelector('#reset-error-msg').textContent='Passwords do not match.'; errEl.classList.add('show'); return; }
+
+  const result = await window.api.authReset(key, new1);
+  if (result.success) {
+    okEl.classList.add('show');
+    setTimeout(() => showScreen('screen-login'), 2000);
+  } else {
+    errEl.querySelector('#reset-error-msg').textContent = result.error || 'Invalid reset key.';
+    errEl.classList.add('show');
+  }
+}
+
+// ── Init ──────────────────────────────────────
+async function init() {
+  const status = await window.api.authStatus();
+  if (status.needsSetup) {
+    showScreen('screen-setup');
+  } else {
+    showScreen('screen-login');
+    // Auto-focus
+    setTimeout(() => document.getElementById('login-pass').focus(), 100);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

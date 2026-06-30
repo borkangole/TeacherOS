@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+out/
+
+# Electron-builder cache
+.electron-builder/
+
+# Environment
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Real/sensitive data — NEVER commit actual personnel records
+data/teacher_records.json
+data/enrollment_records.json
+*.backup

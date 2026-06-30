@@ -1,0 +1,2502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
+<title>Records — Teacher Records System</title>
+<style>
+/* ─── DESIGN TOKENS ─────────────────────────────────────────── */
+:root {
+  --navy:         #0C1E3E;
+  --navy-mid:     #162D52;
+  --navy-light:   #1E3A6E;
+  --blue:         #1A52C4;
+  --blue-hover:   #143FA0;
+  --blue-light:   #EBF0FD;
+  --blue-muted:   #BFCFF8;
+  --gold:         #D4960A;
+  --gold-light:   #FFF8E6;
+  --gold-muted:   #F5D48A;
+  --bg:           #EEF1F6;
+  --surface:      #FFFFFF;
+  --surface-2:    #F7F9FC;
+  --border:       #DDE3EE;
+  --border-2:     #C8D1E0;
+  --text-1:       #0F1C2E;
+  --text-2:       #4A5568;
+  --text-3:       #8A96A8;
+  --red:          #C8291A;
+  --red-light:    #FEF2F2;
+  --red-muted:    #FBCBC9;
+  --green:        #1A8A5A;
+  --green-light:  #F0FDF5;
+  --radius-sm:    6px;
+  --radius-md:    10px;
+  --radius-lg:    14px;
+  --shadow-sm:    0 1px 3px rgba(12,30,62,.08), 0 1px 2px rgba(12,30,62,.04);
+  --shadow-md:    0 4px 16px rgba(12,30,62,.10), 0 1px 4px rgba(12,30,62,.06);
+  --shadow-lg:    0 20px 60px rgba(12,30,62,.18), 0 4px 16px rgba(12,30,62,.08);
+  --font:         'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --sidebar-w:    224px;
+}
+
+/* ─── RESET ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-1);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── ICON HELPER ───────────────────────────────────────────── */
+.icon     { display: inline-block; width: 16px; height: 16px; flex-shrink: 0; vertical-align: middle; }
+.icon-sm  { width: 14px; height: 14px; }
+.icon-md  { width: 18px; height: 18px; }
+.icon-lg  { width: 22px; height: 22px; }
+
+/* ─── APP SHELL ─────────────────────────────────────────────── */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── SIDEBAR ───────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--navy);
+  background-image: radial-gradient(circle, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 20px 20px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255,255,255,.06);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar::-webkit-scrollbar { width: 0; }
+
+.sb-brand {
+  padding: 1.25rem 1rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  flex-shrink: 0;
+}
+.sb-brand-icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.sb-brand-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -.01em;
+  line-height: 1.2;
+}
+.sb-brand-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,.38);
+  margin-top: 1px;
+}
+
+.sb-section {
+  padding: .875rem 1rem .375rem;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,.3);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  flex-shrink: 0;
+}
+
+.sb-nav {
+  padding: 0 .5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: .625rem .75rem;
+  border-radius: var(--radius-md);
+  color: rgba(255,255,255,.55);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+  border-left: 2px solid transparent;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  background: none;
+  font-family: var(--font);
+  width: 100%;
+  text-align: left;
+}
+.sb-item:hover {
+  background: rgba(255,255,255,.07);
+  color: rgba(255,255,255,.85);
+}
+.sb-item.active {
+  background: rgba(255,255,255,.11);
+  color: #fff;
+  font-weight: 600;
+  border-left-color: var(--gold);
+}
+
+.sb-item-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.06);
+  transition: background .12s;
+}
+.sb-item.active .sb-item-icon { background: rgba(212,150,10,.25); }
+.sb-item:hover .sb-item-icon  { background: rgba(255,255,255,.1); }
+
+.sb-spacer { flex: 1; }
+
+.sb-footer {
+  padding: .875rem 1rem;
+  border-top: 1px solid rgba(255,255,255,.07);
+  flex-shrink: 0;
+}
+.sb-footer-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,.3);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin-bottom: 4px;
+}
+.sb-footer-path {
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,.3);
+  word-break: break-all;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+.sb-footer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.6);
+  font-size: 11.5px;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.sb-footer-btn:hover {
+  background: rgba(255,255,255,.13);
+  color: rgba(255,255,255,.9);
+}
+
+/* ─── MAIN AREA ─────────────────────────────────────────────── */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ─── TOPBAR ────────────────────────────────────────────────── */
+.app-topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+.topbar-left  { display: flex; align-items: center; gap: 12px; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+.topbar-page-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--blue-light);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blue);
+  flex-shrink: 0;
+}
+.topbar-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+.topbar-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 1px;
+}
+
+.record-pill {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 12px;
+  border-radius: 100px;
+}
+
+/* ─── BUTTONS ───────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .12s, border-color .12s, box-shadow .12s, transform .08s;
+  white-space: nowrap;
+  line-height: 1;
+  text-decoration: none;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(26,82,196,.3);
+}
+.btn-primary:hover { background: var(--blue-hover); border-color: var(--blue-hover); }
+
+.btn-gold {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(212,150,10,.35);
+}
+.btn-gold:hover { background: #c08909; border-color: #c08909; }
+
+.btn-secondary {
+  background: var(--surface);
+  border-color: var(--border-2);
+  color: var(--text-2);
+}
+.btn-secondary:hover { background: var(--surface-2); color: var(--text-1); }
+
+.btn-danger {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+.btn-danger:hover { background: #ab2117; border-color: #ab2117; }
+
+.btn-outline-blue {
+  background: var(--surface);
+  border-color: var(--border-2);
+  color: var(--blue);
+}
+.btn-outline-blue:hover { background: var(--blue-light); border-color: var(--blue-muted); }
+
+.btn-outline-danger {
+  background: var(--surface);
+  border-color: var(--red-muted);
+  color: var(--red);
+}
+.btn-outline-danger:hover { background: var(--red-light); border-color: #f9a9a6; }
+
+.btn-sm   { padding: 5px 10px; font-size: 12px; gap: 5px; }
+.btn-icon { padding: 6px; border-radius: var(--radius-sm); line-height: 0; }
+
+/* ─── SCHOOL TYPE TABS (segmented pill, matches Enrollment page) ── */
+.type-tabs {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: .625rem 1.5rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.seg-ctrl {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 3px;
+  gap: 2px;
+}
+.type-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: var(--font);
+  color: var(--text-3);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-radius: 16px;
+  transition: all .18s;
+  white-space: nowrap;
+  line-height: 1.4;
+  outline: none;
+}
+.type-tab:hover:not(.active) { background: rgba(0,0,0,.04); color: var(--text-2); }
+.type-tab.active {
+  background: var(--surface);
+  color: var(--text-1);
+  font-weight: 650;
+  box-shadow: 0 1px 6px rgba(12,30,62,.12), 0 1px 2px rgba(12,30,62,.06);
+}
+.type-tab.active#tab-all       { color: var(--blue); }
+.type-tab.elementary.active    { color: #047857; }
+.type-tab.secondary.active     { color: var(--purple); }
+.type-tab .tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 17px;
+  padding: 0 6px;
+  border-radius: 100px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(0,0,0,.06);
+  color: var(--text-3);
+  transition: all .18s;
+}
+.type-tab.active .tab-count { background: rgba(0,0,0,.08); color: inherit; }
+
+/* ─── TOOLBAR (search bar) ──────────────────────────────────── */
+.toolbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: .625rem 1.5rem;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.search-wrap {
+  position: relative;
+  flex: 1;
+}
+.search-wrap .search-icon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+}
+.search-wrap input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px 0 36px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13.5px;
+  color: var(--text-1);
+  background: var(--surface-2);
+  outline: none;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+.search-wrap input::placeholder { color: var(--text-3); }
+.search-wrap input:focus {
+  border-color: var(--blue);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(26,82,196,.1);
+}
+
+/* ─── STATS BAR ─────────────────────────────────────────────── */
+.stats-bar {
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.stat-card {
+  flex: 1;
+  background: var(--surface);
+  padding: .55rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.stat-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon.blue  { background: var(--blue-light);  color: var(--blue); }
+.stat-icon.gold  { background: var(--gold-light);  color: var(--gold); }
+.stat-icon.green { background: var(--green-light); color: var(--green); }
+
+.stat-text  { display: flex; flex-direction: column; gap: 2px; }
+.stat-label { font-size: 10.5px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; line-height: 1; }
+.stat-value { font-size: 18px; font-weight: 700; color: var(--text-1); line-height: 1.2; letter-spacing: -.02em; }
+
+/* ─── TABLE AREA ────────────────────────────────────────────── */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+}
+.app-content::-webkit-scrollbar       { width: 6px; }
+.app-content::-webkit-scrollbar-track { background: transparent; }
+.app-content::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+
+.table-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+thead tr {
+  background: var(--surface-2);
+  border-bottom: 1.5px solid var(--border);
+}
+th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-3);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color .12s;
+}
+th:last-child { cursor: default; }
+th:not(:last-child):hover { color: var(--blue); }
+
+th .sort-wrap { display: inline-flex; align-items: center; gap: 4px; }
+th .sort-icon { opacity: 0; transition: opacity .15s; color: var(--text-3); }
+th.sort-asc  .sort-icon { opacity: 1; color: var(--blue); }
+th.sort-desc .sort-icon { opacity: 1; color: var(--blue); }
+th.sort-asc  .sa { display: block; }
+th.sort-asc  .sd { display: none; }
+th.sort-desc .sa { display: none; }
+th.sort-desc .sd { display: block; }
+th:not(.sort-asc):not(.sort-desc) .sa { display: block; opacity: .3; }
+th:not(.sort-asc):not(.sort-desc) .sd { display: none; }
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  transition: background .1s, border-left-color .1s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover {
+  background: #F5F8FF;
+  border-left-color: var(--blue);
+}
+
+td {
+  padding: 10px 14px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  vertical-align: middle;
+}
+td.td-name {
+  font-weight: 600;
+  color: var(--text-1);
+  font-size: 13.5px;
+}
+.code-tag {
+  display: inline-block;
+  font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  font-size: 11.5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: .01em;
+}
+.td-empty  { color: var(--text-3); }
+.td-actions { text-align: right; white-space: nowrap; }
+.action-group { display: inline-flex; gap: 4px; align-items: center; }
+
+/* ─── EMPTY STATE ───────────────────────────────────────────── */
+.empty-state {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.25rem;
+  background: var(--surface-2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  border: 1.5px dashed var(--border-2);
+}
+.empty-state h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-1);
+  margin-bottom: 6px;
+}
+.empty-state p {
+  font-size: 13px;
+  color: var(--text-3);
+  margin-bottom: 1.25rem;
+}
+
+/* ─── MODAL OVERLAY ─────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7,15,28,.55);
+  z-index: 200;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  overflow-y: auto;
+  backdrop-filter: blur(3px);
+}
+.modal-overlay.open { display: flex; }
+
+/* ─── ADD / EDIT MODAL ──────────────────────────────────────── */
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 740px;
+  margin: auto;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  animation: modal-in .18s cubic-bezier(.22,.68,0,1.2);
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(-10px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.modal-header {
+  background: var(--navy);
+  background-image: radial-gradient(circle, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  padding: 1.125rem 1.5rem;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.modal-header-left { display: flex; align-items: center; gap: 10px; }
+.modal-header-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,.8);
+}
+.modal-header h2 { font-size: 15px; font-weight: 600; color: #fff; letter-spacing: -.01em; }
+.modal-close {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.6);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .12s, color .12s;
+}
+.modal-close:hover { background: rgba(255,255,255,.18); color: #fff; }
+
+.modal-body {
+  padding: 1.5rem;
+  max-height: 66vh;
+  overflow-y: auto;
+}
+.modal-body::-webkit-scrollbar       { width: 6px; }
+.modal-body::-webkit-scrollbar-track { background: transparent; }
+.modal-body::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  background: var(--surface-2);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* ─── FORM LAYOUT ───────────────────────────────────────────── */
+.form-section { margin-bottom: 1.5rem; }
+.form-section:last-child { margin-bottom: 0; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+  padding-bottom: .625rem;
+  border-bottom: 1.5px solid var(--border);
+}
+.section-header-icon {
+  width: 26px;
+  height: 26px;
+  background: var(--blue-light);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blue);
+  flex-shrink: 0;
+}
+.section-header span {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--blue);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.span2 { grid-column: 1 / -1; }
+
+.form-group label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  letter-spacing: .01em;
+}
+.form-group label .req { color: var(--red); margin-left: 2px; }
+
+.form-group input,
+.form-group textarea {
+  height: 38px;
+  padding: 0 11px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-family: var(--font);
+  color: var(--text-1);
+  background: var(--surface);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(26,82,196,.1);
+}
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--text-3); }
+.form-group textarea {
+  height: auto;
+  min-height: 80px;
+  padding: 9px 11px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* ─── DELETE CONFIRM MODAL ──────────────────────────────────── */
+.del-modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  animation: modal-in .18s cubic-bezier(.22,.68,0,1.2);
+}
+.del-modal-top {
+  padding: 2rem 2rem 1.5rem;
+  text-align: center;
+}
+.del-icon-wrap {
+  width: 64px;
+  height: 64px;
+  background: var(--red-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  color: var(--red);
+  border: 2px solid #FBDAD8;
+}
+.del-modal-top h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin-bottom: 8px;
+  letter-spacing: -.01em;
+}
+.del-modal-top p {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.del-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  background: var(--surface-2);
+}
+
+/* ─── IMPORT MODAL ──────────────────────────────────────────── */
+.import-step { display: none; }
+.import-step.active { display: block; }
+
+.step-indicators {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 1.5rem;
+}
+.step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 2px solid var(--border-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  flex-shrink: 0;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.step-dot.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.step-dot.done   { background: var(--green); border-color: var(--green); color: #fff; }
+.step-line { flex: 1; height: 2px; background: var(--border); max-width: 60px; }
+.step-labels { display: flex; justify-content: space-between; margin-top: 4px; margin-bottom: 1.25rem; }
+.step-label { font-size: 11px; color: var(--text-3); font-weight: 500; text-align: center; flex: 1; }
+.step-label.active { color: var(--blue); font-weight: 700; }
+
+.drop-zone {
+  border: 2px dashed var(--border-2);
+  border-radius: var(--radius-lg);
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  background: var(--surface-2);
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+.drop-zone-icon {
+  width: 52px; height: 52px;
+  background: var(--blue-light);
+  border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue); margin: 0 auto .875rem;
+}
+.drop-zone h3 { font-size: 15px; font-weight: 600; color: var(--text-1); margin-bottom: 6px; }
+.drop-zone p  { font-size: 13px; color: var(--text-3); }
+.drop-zone .file-selected { font-size: 13px; color: var(--green); font-weight: 600; margin-top: 8px; }
+
+.mapping-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mapping-table th {
+  padding: 8px 12px; text-align: left;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--text-3); background: var(--surface-2);
+  border-bottom: 1.5px solid var(--border);
+}
+.mapping-table td {
+  padding: 6px 12px; border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.mapping-table tr:last-child td { border-bottom: none; }
+.mapping-table select {
+  width: 100%; height: 32px; padding: 0 8px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 12.5px; font-family: var(--font); color: var(--text-1);
+  background: var(--surface); outline: none; cursor: pointer;
+  transition: border-color .15s;
+}
+.mapping-table select:focus { border-color: var(--blue); }
+.field-label { font-weight: 600; color: var(--text-1); font-size: 12.5px; }
+.field-req   { color: var(--red); margin-left: 2px; }
+.match-badge {
+  display: inline-block;
+  font-size: 10.5px; font-weight: 600;
+  padding: 1px 7px; border-radius: 100px;
+  background: var(--green-light); color: var(--green);
+  margin-left: 6px;
+}
+.match-badge.warn { background: var(--gold-light); color: var(--gold); }
+
+.preview-info {
+  background: var(--blue-light); border: 1px solid var(--blue-muted);
+  border-radius: var(--radius-md); padding: .875rem 1rem;
+  font-size: 13px; color: var(--blue); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.preview-scroll { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border); }
+.preview-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+.preview-table th { padding: 7px 10px; background: var(--surface-2); text-align: left; font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .04em; border-bottom: 1.5px solid var(--border); }
+.preview-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text-2); max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+.preview-table tr:last-child td { border-bottom: none; }
+
+.import-progress { text-align: center; padding: 1.5rem 0; }
+.import-progress-bar-wrap { background: var(--surface-2); border-radius: 100px; height: 8px; margin: 1rem 0; overflow: hidden; border: 1px solid var(--border); }
+.import-progress-bar { height: 100%; background: var(--blue); border-radius: 100px; transition: width .15s; }
+.import-status { font-size: 13px; color: var(--text-2); }
+.import-done { color: var(--green); font-weight: 600; font-size: 15px; }
+
+/* ─── TOAST ─────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--text-1);
+  color: white;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .22s, transform .22s;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-md);
+}
+.toast.show { opacity: 1; transform: none; }
+.toast-icon { color: #4ADE80; flex-shrink: 0; }
+
+/* ─── RESPONSIVE ────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-group.span2 { grid-column: 1; }
+  .app-content { padding: 1rem; }
+  .toolbar { padding: .625rem 1rem; }
+  .stats-bar .stat-card { padding: .5rem 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SVG ICON LIBRARY                                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="i-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+  </symbol>
+  <symbol id="i-records" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/>
+  </symbol>
+  <symbol id="i-enroll" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8"/>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+    <line x1="12" y1="5" x2="12" y2="19"/>
+    <line x1="5" y1="12" x2="19" y2="12"/>
+  </symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+    <polyline points="7 10 12 15 17 10"/>
+    <line x1="12" y1="15" x2="12" y2="3"/>
+  </symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+  </symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="3 6 5 6 21 6"/>
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+    <path d="M10 11v6"/><path d="M14 11v6"/>
+    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+  </symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+    <polyline points="17 8 12 3 7 8"/>
+    <line x1="12" y1="3" x2="12" y2="15"/>
+  </symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </symbol>
+  <symbol id="i-cu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </symbol>
+  <symbol id="i-cd" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="6 9 12 15 18 9"/>
+  </symbol>
+  <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </symbol>
+  <symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <polyline points="9 22 9 12 15 12 15 22"/>
+  </symbol>
+  <symbol id="i-id" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="5" width="20" height="14" rx="2"/>
+    <circle cx="9" cy="12" r="2"/>
+    <path d="M15 9h2M15 12h2M15 15h2"/>
+  </symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/>
+    <line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+  </symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+    <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+  </symbol>
+</svg>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- APP LAYOUT                                                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="app-layout">
+
+  <!-- ════ SIDEBAR ════════════════════════════════════════════ -->
+  <nav class="sidebar">
+
+    <div class="sb-brand">
+      <div class="sb-brand-icon">
+        <img src="../assets/logo.png" alt="TeacherOS" style="width:26px;height:26px;object-fit:contain;">
+      </div>
+      <div>
+        <div class="sb-brand-name">TeacherOS</div>
+        <div class="sb-brand-sub">DepEd Personnel</div>
+      </div>
+    </div>
+
+    <div class="sb-section">Navigation</div>
+
+    <div class="sb-nav">
+      <a href="dashboard.html" class="sb-item">
+        <span class="sb-item-icon">
+          <svg class="icon icon-sm"><use href="#i-dash"/></svg>
+        </span>
+        Dashboard
+      </a>
+      <a href="index.html" class="sb-item active">
+        <span class="sb-item-icon">
+          <svg class="icon icon-sm"><use href="#i-records"/></svg>
+        </span>
+        Records
+      </a>
+      <a href="enrollment.html" class="sb-item">
+        <span class="sb-item-icon"><svg class="icon icon-sm"><use href="#i-enroll"/></svg></span>
+        Enrollment
+      </a>
+    </div>
+
+    <div class="sb-spacer"></div>
+
+    <div class="sb-footer">
+      <div class="sb-footer-label">Data file</div>
+      <div class="sb-footer-path" id="db-path-text">Loading…</div>
+      <div style="display:flex;gap:6px;margin-top:2px;">
+        <button class="sb-footer-btn" onclick="window.api && window.api.openDbFolder()" style="flex:1;">
+          <svg class="icon icon-sm"><use href="#i-folder"/></svg>
+          Open folder
+        </button>
+        <button class="sb-footer-btn" onclick="window.api && window.api.authLogout()"
+          title="Sign out" style="background:rgba(200,41,26,.15);border-color:rgba(200,41,26,.3);color:rgba(255,100,80,.9);">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </nav>
+
+  <!-- ════ MAIN ════════════════════════════════════════════════ -->
+  <div class="app-main">
+
+    <!-- Top bar -->
+    <div class="app-topbar">
+      <div class="topbar-left">
+        <div class="topbar-page-icon">
+          <svg class="icon icon-md"><use href="#i-records"/></svg>
+        </div>
+        <div>
+          <div class="topbar-title">Records</div>
+          <div class="topbar-sub" id="topbar-sub">Loading…</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span class="record-pill" id="total-badge">—</span>
+        <button class="btn btn-secondary btn-sm" onclick="doExportCSV()">
+          <svg class="icon"><use href="#i-download"/></svg>
+          Export CSV
+        </button>
+        <button class="btn btn-teal btn-sm" onclick="openImport()">
+          <svg class="icon"><use href="#i-upload"/></svg>
+          Import CSV
+        </button>
+        <button class="btn btn-gold btn-sm" onclick="openAdd()">
+          <svg class="icon"><use href="#i-plus"/></svg>
+          Add Record
+        </button>
+      </div>
+    </div>
+
+    <!-- School type filter tabs -->
+    <div class="type-tabs">
+      <div class="seg-ctrl">
+        <button class="type-tab active" id="tab-all" onclick="setTypeFilter('all')">
+          All Schools
+          <span class="tab-count" id="count-all">0</span>
+        </button>
+        <button class="type-tab elementary" id="tab-elementary" onclick="setTypeFilter('elementary')">
+          <svg class="icon icon-sm"><use href="#i-building"/></svg>
+          Elementary
+          <span class="tab-count" id="count-elementary">0</span>
+        </button>
+        <button class="type-tab secondary" id="tab-secondary" onclick="setTypeFilter('secondary')">
+          <svg class="icon icon-sm"><use href="#i-enroll"/></svg>
+          Secondary
+          <span class="tab-count" id="count-secondary">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="icon search-icon"><use href="#i-search"/></svg>
+        <input type="text" id="search-input"
+          placeholder="Search by name, school, GSIS No., TIN, position, any field…"
+          oninput="onSearch()">
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="clearSearch()">
+        <svg class="icon icon-sm"><use href="#i-x"/></svg>
+        Clear
+      </button>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon blue"><svg class="icon icon-sm"><use href="#i-user"/></svg></div>
+        <div class="stat-text">
+          <span class="stat-label">Total Records</span>
+          <span class="stat-value" id="stat-total">—</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon gold"><svg class="icon icon-sm"><use href="#i-building"/></svg></div>
+        <div class="stat-text">
+          <span class="stat-label">Schools</span>
+          <span class="stat-value" id="stat-schools">—</span>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-search-card" style="display:none">
+        <div class="stat-icon green"><svg class="icon icon-sm"><use href="#i-search"/></svg></div>
+        <div class="stat-text">
+          <span class="stat-label">Search Results</span>
+          <span class="stat-value" id="stat-results">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="app-content">
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="sortBy('nameOfTeacher')" id="th-nameOfTeacher">
+                  <span class="sort-wrap">Name of Teacher
+                    <span class="sort-icon">
+                      <svg class="icon icon-sm sa"><use href="#i-cu"/></svg>
+                      <svg class="icon icon-sm sd"><use href="#i-cd"/></svg>
+                    </span>
+                  </span>
+                </th>
+                <th onclick="sortBy('nameOfSchool')" id="th-nameOfSchool">
+                  <span class="sort-wrap">School
+                    <span class="sort-icon">
+                      <svg class="icon icon-sm sa"><use href="#i-cu"/></svg>
+                      <svg class="icon icon-sm sd"><use href="#i-cd"/></svg>
+                    </span>
+                  </span>
+                </th>
+                <th onclick="sortBy('presentPosition')" id="th-presentPosition">
+                  <span class="sort-wrap">Position
+                    <span class="sort-icon">
+                      <svg class="icon icon-sm sa"><use href="#i-cu"/></svg>
+                      <svg class="icon icon-sm sd"><use href="#i-cd"/></svg>
+                    </span>
+                  </span>
+                </th>
+                <th onclick="sortBy('birthday')" id="th-birthday">
+                  <span class="sort-wrap">Birthday
+                    <span class="sort-icon">
+                      <svg class="icon icon-sm sa"><use href="#i-cu"/></svg>
+                      <svg class="icon icon-sm sd"><use href="#i-cd"/></svg>
+                    </span>
+                  </span>
+                </th>
+                <th onclick="sortBy('employeeNo')" id="th-employeeNo">
+                  <span class="sort-wrap">Employee No.
+                    <span class="sort-icon">
+                      <svg class="icon icon-sm sa"><use href="#i-cu"/></svg>
+                      <svg class="icon icon-sm sd"><use href="#i-cd"/></svg>
+                    </span>
+                  </span>
+                </th>
+                <th onclick="sortBy('gsisNo')" id="th-gsisNo">
+                  <span class="sort-wrap">GSIS No.
+                    <span class="sort-icon">
+                      <svg class="icon icon-sm sa"><use href="#i-cu"/></svg>
+                      <svg class="icon icon-sm sd"><use href="#i-cd"/></svg>
+                    </span>
+                  </span>
+                </th>
+                <th onclick="sortBy('tinNo')" id="th-tinNo">
+                  <span class="sort-wrap">TIN No.
+                    <span class="sort-icon">
+                      <svg class="icon icon-sm sa"><use href="#i-cu"/></svg>
+                      <svg class="icon icon-sm sd"><use href="#i-cd"/></svg>
+                    </span>
+                  </span>
+                </th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /app-main -->
+</div><!-- /app-layout -->
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- ADD / EDIT MODAL                                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="form-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-header-icon">
+          <svg class="icon"><use href="#i-records"/></svg>
+        </div>
+        <h2 id="modal-title">Add New Record</h2>
+      </div>
+      <button class="modal-close" onclick="closeModal('form-modal')">
+        <svg class="icon icon-sm"><use href="#i-x"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Basic Info -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-header-icon"><svg class="icon icon-sm"><use href="#i-user"/></svg></div>
+          <span>Basic Information</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Name of Teacher <span class="req">*</span></label>
+            <input type="text" id="f-nameOfTeacher" placeholder="e.g. Juan Dela Cruz">
+          </div>
+          <div class="form-group">
+            <label>Name of School</label>
+            <input type="text" id="f-nameOfSchool" placeholder="e.g. Mambusao Central School">
+          </div>
+          <div class="form-group">
+            <label>Present Position</label>
+            <input type="text" id="f-presentPosition" placeholder="e.g. Teacher I, Master Teacher II">
+          </div>
+          <div class="form-group">
+            <label>Birthday</label>
+            <input type="date" id="f-birthday">
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointment -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-header-icon"><svg class="icon icon-sm"><use href="#i-calendar"/></svg></div>
+          <span>Appointment Details</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Appointment Date (Original)</label>
+            <input type="date" id="f-appointmentOriginal">
+          </div>
+          <div class="form-group">
+            <label>Appointment Date (Latest)</label>
+            <input type="date" id="f-appointmentLatest">
+          </div>
+        </div>
+      </div>
+
+      <!-- Government IDs -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-header-icon"><svg class="icon icon-sm"><use href="#i-id"/></svg></div>
+          <span>Government IDs &amp; Numbers</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Employee No.</label>
+            <input type="text" id="f-employeeNo">
+          </div>
+          <div class="form-group">
+            <label>Item No.</label>
+            <input type="text" id="f-itemNo">
+          </div>
+          <div class="form-group">
+            <label>BP No.</label>
+            <input type="text" id="f-bpNo">
+          </div>
+          <div class="form-group">
+            <label>GSIS No.</label>
+            <input type="text" id="f-gsisNo">
+          </div>
+          <div class="form-group">
+            <label>UMID No.</label>
+            <input type="text" id="f-umidNo">
+          </div>
+          <div class="form-group">
+            <label>PhilHealth No.</label>
+            <input type="text" id="f-philHealthNo">
+          </div>
+          <div class="form-group">
+            <label>TIN No.</label>
+            <input type="text" id="f-tinNo">
+          </div>
+          <div class="form-group">
+            <label>PAGIBIG MID No.</label>
+            <input type="text" id="f-pagibigMidNo">
+          </div>
+          <div class="form-group">
+            <label>Account Number</label>
+            <input type="text" id="f-accountNo">
+          </div>
+        </div>
+      </div>
+
+      <!-- Remarks -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-header-icon"><svg class="icon icon-sm"><use href="#i-records"/></svg></div>
+          <span>Remarks</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group span2">
+            <label>Notes / Remarks</label>
+            <textarea id="f-remarks" placeholder="Any additional notes or observations…"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('form-modal')">Cancel</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveRecord()">
+        <svg class="icon"><use href="#i-check"/></svg>
+        Save Record
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- VIEW DETAILS MODAL                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="view-modal">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-header-icon"><svg class="icon"><use href="#i-eye"/></svg></div>
+        <h2 id="view-modal-title">Teacher Details</h2>
+      </div>
+      <button class="modal-close" onclick="closeModal('view-modal')">
+        <svg class="icon icon-sm"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="view-modal-body" style="padding:0;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('view-modal')">Close</button>
+      <button class="btn btn-primary" id="view-edit-btn" onclick="">
+        <svg class="icon"><use href="#i-edit"/></svg>
+        Edit Record
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- DELETE MODAL                                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="del-modal">
+    <div class="del-modal-top">
+      <div class="del-icon-wrap">
+        <svg class="icon icon-lg"><use href="#i-alert"/></svg>
+      </div>
+      <h3>Delete Record?</h3>
+      <p id="del-msg">This will permanently remove the record. This action cannot be undone.</p>
+    </div>
+    <div class="del-modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">
+        <svg class="icon"><use href="#i-trash"/></svg>
+        Delete Record
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- IMPORT MODAL                                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal" style="max-width:860px;">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-header-icon"><svg class="icon"><use href="#i-upload"/></svg></div>
+        <h2>Import Teacher Records from CSV</h2>
+      </div>
+      <button class="modal-close" onclick="closeImport()"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Step indicators -->
+      <div class="step-indicators">
+        <div class="step-dot active" id="sdot-1">1</div>
+        <div class="step-line"></div>
+        <div class="step-dot" id="sdot-2">2</div>
+        <div class="step-line"></div>
+        <div class="step-dot" id="sdot-3">3</div>
+      </div>
+      <div class="step-labels">
+        <span class="step-label active" id="slabel-1">Upload File</span>
+        <span class="step-label" id="slabel-2">Map Columns</span>
+        <span class="step-label" id="slabel-3">Preview &amp; Import</span>
+      </div>
+
+      <!-- STEP 1: Upload -->
+      <div class="import-step active" id="import-step-1">
+
+        <!-- Browse button area -->
+        <div class="drop-zone" id="drop-zone" onclick="browseFile()">
+          <div class="drop-zone-icon">
+            <svg class="icon icon-lg"><use href="#i-upload"/></svg>
+          </div>
+          <h3>Click to browse for your file</h3>
+          <p>Supports <strong>Excel workbook (.xlsx)</strong> and <strong>CSV (.csv)</strong> — no conversion needed</p>
+          <div class="file-selected" id="file-selected-label" style="display:none"></div>
+        </div>
+
+        <!-- Sheet picker (shown only when Excel has multiple worksheets) -->
+        <div id="sheet-picker" style="display:none;margin-top:1rem;padding:1rem;background:var(--blue-light);border:1px solid var(--blue-muted);border-radius:var(--radius-md);">
+          <div style="font-size:13px;font-weight:600;color:var(--blue);margin-bottom:.625rem;">
+            <svg class="icon icon-sm"><use href="#i-records"/></svg>
+            This workbook has multiple worksheets — pick the one to import:
+          </div>
+          <select id="sheet-select" style="height:36px;padding:0 28px 0 10px;border:1.5px solid var(--blue-muted);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--text-1);background:var(--surface);outline:none;cursor:pointer;width:100%;max-width:320px;-webkit-appearance:none;">
+          </select>
+        </div>
+
+      </div>
+
+      <!-- STEP 2: Column Mapping -->
+      <div class="import-step" id="import-step-2">
+        <div class="preview-info">
+          <svg class="icon"><use href="#i-check"/></svg>
+          <span id="mapping-info">File loaded. Review the column mapping below — green means auto-detected.</span>
+        </div>
+        <table class="mapping-table">
+          <thead>
+            <tr>
+              <th style="width:220px">System Field</th>
+              <th>Column in Your CSV</th>
+            </tr>
+          </thead>
+          <tbody id="mapping-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- STEP 3: Preview & Import -->
+      <div class="import-step" id="import-step-3">
+        <div class="preview-info" id="preview-info-msg">
+          <svg class="icon"><use href="#i-check"/></svg>
+          <span id="preview-count-msg"></span>
+        </div>
+        <div class="preview-scroll">
+          <table class="preview-table" id="preview-table"></table>
+        </div>
+        <div class="import-progress" id="import-progress" style="display:none">
+          <div class="import-status" id="import-status-text">Importing…</div>
+          <div class="import-progress-bar-wrap">
+            <div class="import-progress-bar" id="import-progress-bar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeImport()">Cancel</button>
+      <button class="btn btn-secondary" id="import-back-btn" style="display:none" onclick="importGoBack()">← Back</button>
+      <button class="btn btn-primary" id="import-next-btn" disabled onclick="importNext()">
+        Next →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TOAST                                                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="toast" id="toast">
+  <svg class="icon toast-icon"><use href="#i-check"/></svg>
+  <span id="toast-msg"></span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SCRIPT                                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<script>
+const FIELDS = [
+  'nameOfTeacher', 'nameOfSchool', 'birthday', 'employeeNo', 'itemNo', 'bpNo',
+  'gsisNo', 'umidNo', 'philHealthNo', 'tinNo', 'appointmentOriginal',
+  'appointmentLatest', 'presentPosition', 'pagibigMidNo', 'accountNo', 'remarks'
+];
+const SORT_COLS = ['nameOfTeacher','nameOfSchool','presentPosition','birthday','employeeNo','gsisNo','tinNo'];
+
+let records   = [];
+let editId    = null;
+let deleteId  = null;
+let sortField = 'nameOfTeacher';
+let sortDir   = 'asc';
+
+// ── INIT ──────────────────────────────────────────────────────
+
+async function init() {
+  if (window.api) {
+    records = await window.api.getAll();
+    const dbPath = await window.api.getDbPath();
+    document.getElementById('db-path-text').textContent = dbPath;
+  } else {
+    records = [];
+    document.getElementById('db-path-text').textContent = 'Browser preview mode';
+  }
+  renderTable();
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function codeTag(v) {
+  return v
+    ? `<span class="code-tag">${esc(v)}</span>`
+    : `<span class="td-empty">—</span>`;
+}
+
+function getSearch() {
+  return document.getElementById('search-input').value.toLowerCase().trim();
+}
+
+// ── RENDER TABLE ──────────────────────────────────────────────
+
+function renderTable() {
+  const q = getSearch();
+
+  let filtered = records.filter(r => {
+    // School type filter
+    if (activeTypeFilter !== 'all' && getSchoolType(r.nameOfSchool) !== activeTypeFilter) return false;
+    // Search filter
+    if (q && !FIELDS.some(f => (r[f] || '').toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    const va = (a[sortField] || '').toLowerCase();
+    const vb = (b[sortField] || '').toLowerCase();
+    return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+
+  // Update sort header indicators
+  SORT_COLS.forEach(f => {
+    const th = document.getElementById('th-' + f);
+    if (th) th.className = f === sortField ? 'sort-' + sortDir : '';
+  });
+
+  // Stats
+  const schools = new Set(records.map(r => r.nameOfSchool).filter(Boolean)).size;
+  updateTabCounts(records);
+  document.getElementById('total-badge').textContent =
+    records.length + ' record' + (records.length !== 1 ? 's' : '');
+  const typeLabel = activeTypeFilter === 'elementary' ? ' elementary' : activeTypeFilter === 'secondary' ? ' secondary' : '';
+  document.getElementById('topbar-sub').textContent = records.length === 0
+    ? 'No records yet'
+    : `${filtered.length} of ${records.length}${typeLabel} teacher${records.length !== 1 ? 's' : ''} · ${schools} school${schools !== 1 ? 's' : ''}`;
+  document.getElementById('stat-total').textContent   = records.length;
+  document.getElementById('stat-schools').textContent = schools;
+
+  const searchCard = document.getElementById('stat-search-card');
+  if (q) {
+    searchCard.style.display = '';
+    document.getElementById('stat-results').textContent = filtered.length;
+  } else {
+    searchCard.style.display = 'none';
+  }
+
+  // Render rows
+  const tbody = document.getElementById('table-body');
+
+  if (!filtered.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="padding:0;border:none;">
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg style="width:28px;height:28px"><use href="#i-inbox"/></svg>
+            </div>
+            <h3>${q ? 'No results found' : 'No records yet'}</h3>
+            <p>${q
+              ? `No records match <strong>"${esc(q)}"</strong>. Try a different search term.`
+              : 'Click <strong>Add Record</strong> to create the first entry.'
+            }</p>
+            ${!q
+              ? `<button class="btn btn-gold btn-sm" onclick="openAdd()"><svg class="icon"><use href="#i-plus"/></svg> Add First Record</button>`
+              : `<button class="btn btn-secondary btn-sm" onclick="clearSearch()"><svg class="icon"><use href="#i-x"/></svg> Clear Search</button>`
+            }
+          </div>
+        </td>
+      </tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(rec => `
+    <tr>
+      <td class="td-name" title="${esc(rec.nameOfTeacher)}">
+        ${esc(rec.nameOfTeacher) || '<span class="td-empty">Unnamed</span>'}
+      </td>
+      <td title="${esc(rec.nameOfSchool)}">
+        ${esc(rec.nameOfSchool) || '<span class="td-empty">—</span>'}
+      </td>
+      <td title="${esc(rec.presentPosition)}">
+        ${esc(rec.presentPosition) || '<span class="td-empty">—</span>'}
+      </td>
+      <td>${esc(rec.birthday) || '<span class="td-empty">—</span>'}</td>
+      <td>${codeTag(rec.employeeNo)}</td>
+      <td>${codeTag(rec.gsisNo)}</td>
+      <td>${codeTag(rec.tinNo)}</td>
+      <td class="td-actions">
+        <div class="action-group">
+          <button class="btn btn-sm btn-icon" style="background:var(--surface);border:1px solid var(--border-2);color:var(--text-3);"
+            title="View all details" onclick="openView(${rec.id})">
+            <svg class="icon"><use href="#i-eye"/></svg>
+          </button>
+          <button class="btn btn-outline-blue btn-sm btn-icon"
+            title="Edit record" onclick="openEdit(${rec.id})">
+            <svg class="icon"><use href="#i-edit"/></svg>
+          </button>
+          <button class="btn btn-outline-danger btn-sm btn-icon"
+            title="Delete record" onclick="openDelete(${rec.id})">
+            <svg class="icon"><use href="#i-trash"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── SORT / SEARCH ─────────────────────────────────────────────
+
+function sortBy(field) {
+  if (sortField === field) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField = field;
+    sortDir = 'asc';
+  }
+  renderTable();
+}
+
+function onSearch()    { renderTable(); }
+function clearSearch() { document.getElementById('search-input').value = ''; renderTable(); }
+
+// ── School type filter ────────────────────────────────────────
+
+let activeTypeFilter = 'all';
+
+function getSchoolType(schoolName) {
+  if (!schoolName) return 'elementary';
+  const n = schoolName.toUpperCase();
+  // Secondary: contains High School keywords
+  if (
+    n.includes('HIGH SCHOOL') ||
+    n.includes('NHS')         ||
+    /\bHS\b/.test(n)         ||
+    n.includes('NATIONAL HS') ||
+    n.includes('VOCATIONAL')  ||
+    n.includes('TECHNICAL')   ||
+    n.includes('COLLEGE')
+  ) return 'secondary';
+  // Everything else is elementary
+  return 'elementary';
+}
+
+function setTypeFilter(type) {
+  activeTypeFilter = type;
+  // Update tab active states
+  ['all','elementary','secondary'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === type);
+  });
+  renderTable();
+}
+
+function updateTabCounts(allRecords) {
+  const elem = allRecords.filter(r => getSchoolType(r.nameOfSchool) === 'elementary').length;
+  const sec  = allRecords.filter(r => getSchoolType(r.nameOfSchool) === 'secondary').length;
+  document.getElementById('count-all').textContent       = allRecords.length;
+  document.getElementById('count-elementary').textContent = elem;
+  document.getElementById('count-secondary').textContent  = sec;
+}
+
+// ── MODAL HELPERS ─────────────────────────────────────────────
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function clearForm() {
+  FIELDS.forEach(f => {
+    const el = document.getElementById('f-' + f);
+    if (el) el.value = '';
+  });
+}
+
+function getForm() {
+  return FIELDS.reduce((obj, f) => {
+    const el = document.getElementById('f-' + f);
+    obj[f] = el ? el.value.trim() : '';
+    return obj;
+  }, {});
+}
+
+function setForm(rec) {
+  FIELDS.forEach(f => {
+    const el = document.getElementById('f-' + f);
+    if (el) el.value = rec[f] || '';
+  });
+}
+
+// ── ADD / EDIT ────────────────────────────────────────────────
+
+function openAdd() {
+  editId = null;
+  clearForm();
+  document.getElementById('modal-title').textContent = 'Add New Record';
+  document.getElementById('save-btn').innerHTML =
+    '<svg class="icon"><use href="#i-check"/></svg> Save Record';
+  openModal('form-modal');
+  setTimeout(() => document.getElementById('f-nameOfTeacher').focus(), 100);
+}
+
+function openEdit(id) {
+  const rec = records.find(r => r.id === id);
+  if (!rec) return;
+  editId = id;
+  setForm(rec);
+  document.getElementById('modal-title').textContent = 'Edit — ' + (rec.nameOfTeacher || '');
+  document.getElementById('save-btn').innerHTML =
+    '<svg class="icon"><use href="#i-check"/></svg> Update Record';
+  openModal('form-modal');
+}
+
+async function saveRecord() {
+  const data = getForm();
+
+  if (!data.nameOfTeacher) {
+    const el = document.getElementById('f-nameOfTeacher');
+    el.focus();
+    el.style.borderColor = 'var(--red)';
+    setTimeout(() => el.style.borderColor = '', 1800);
+    return;
+  }
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+
+  try {
+    if (window.api) {
+      if (editId === null) {
+        const result = await window.api.add(data);
+        data.id = result.id;
+        records.push(data);
+        showToast('Record added successfully.');
+      } else {
+        await window.api.update(editId, data);
+        const idx = records.findIndex(r => r.id === editId);
+        if (idx !== -1) records[idx] = { ...records[idx], ...data };
+        showToast('Record updated.');
+      }
+    } else {
+      // Browser preview fallback
+      if (editId === null) {
+        data.id = Date.now();
+        data.createdAt = new Date().toISOString();
+        records.push(data);
+        showToast('Record added (preview mode).');
+      } else {
+        const idx = records.findIndex(r => r.id === editId);
+        if (idx !== -1) records[idx] = { ...records[idx], ...data };
+        showToast('Record updated (preview mode).');
+      }
+    }
+    closeModal('form-modal');
+    renderTable();
+  } catch (e) {
+    alert('Error saving record: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── DELETE ────────────────────────────────────────────────────
+
+function openDelete(id) {
+  deleteId = id;
+  const rec  = records.find(r => r.id === id);
+  const name = rec ? rec.nameOfTeacher : 'this record';
+  document.getElementById('del-msg').textContent =
+    `You are about to permanently delete the record for "${name}". This cannot be undone.`;
+  openModal('delete-modal');
+}
+
+async function confirmDelete() {
+  if (window.api) await window.api.delete(deleteId);
+  records = records.filter(r => r.id !== deleteId);
+  closeModal('delete-modal');
+  renderTable();
+  showToast('Record deleted.');
+}
+
+// ── EXPORT ────────────────────────────────────────────────────
+
+async function doExportCSV() {
+  if (!records.length) { alert('No records to export.'); return; }
+
+  if (window.api) {
+    const result = await window.api.exportCSV();
+    if (result && result.success) showToast('CSV exported successfully.');
+  } else {
+    const HEADERS = [
+      'Name of Teacher','Name of School','Birthday','Employee No.','Item No.','BP No.',
+      'GSIS No.','UMID No.','PhilHealth No.','TIN No.','Appointment (Original)',
+      'Appointment (Latest)','Present Position','PAGIBIG MID No.','Account Number','Remarks'
+    ];
+    const csv = '\uFEFF' + [
+      HEADERS.map(h => `"${h}"`).join(','),
+      ...records.map(r => FIELDS.map(f => `"${(r[f] || '').replace(/"/g,'""')}"`).join(','))
+    ].join('\r\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'teacher_records.csv';
+    a.click();
+    showToast('CSV exported.');
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── KEYBOARD & BACKDROP ───────────────────────────────────────
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+  }
+});
+
+
+// ── View Details ──────────────────────────────────────────────
+
+const FIELD_SECTIONS = [
+  {
+    title: 'Basic Information', icon: 'i-user', fields: [
+      { key: 'nameOfTeacher',   label: 'Name of Teacher'  },
+      { key: 'nameOfSchool',    label: 'Name of School'   },
+      { key: 'presentPosition', label: 'Present Position' },
+      { key: 'birthday',        label: 'Birthday', type: 'birthday' },
+    ]
+  },
+  {
+    title: 'Appointment Details', icon: 'i-calendar', fields: [
+      { key: 'appointmentOriginal', label: 'Date of Original Appointment', type: 'date' },
+      { key: 'appointmentLatest',   label: 'Date of Latest Appointment',   type: 'date' },
+    ]
+  },
+  {
+    title: 'Government IDs & Numbers', icon: 'i-id', fields: [
+      { key: 'employeeNo',   label: 'Employee No.'   },
+      { key: 'itemNo',       label: 'Item No.'       },
+      { key: 'bpNo',         label: 'BP No.'         },
+      { key: 'gsisNo',       label: 'GSIS No.'       },
+      { key: 'umidNo',       label: 'UMID No.'       },
+      { key: 'philHealthNo', label: 'PhilHealth No.' },
+      { key: 'tinNo',        label: 'TIN No.'        },
+      { key: 'pagibigMidNo', label: 'PAGIBIG MID No.'},
+      { key: 'accountNo',    label: 'Account Number' },
+    ]
+  },
+  {
+    title: 'Remarks', icon: 'i-records', fields: [
+      { key: 'remarks', label: 'Remarks / Notes', full: true }
+    ]
+  },
+];
+
+// ── Date helpers ───────────────────────────────────────────────
+
+function parseDate(str) {
+  if (!str || !String(str).trim()) return null;
+  var s = String(str).trim();
+  // Already a JS date string (from SheetJS cellDates)
+  var d = new Date(s);
+  if (!isNaN(d.getTime())) return d;
+  // Try MM-DD-YYYY or DD-MM-YYYY slash formats
+  var parts = s.split(/[-\/]/);
+  if (parts.length === 3) {
+    var a = parseInt(parts[0]), b = parseInt(parts[1]), c = parseInt(parts[2]);
+    // If year is 4 digits in position 2
+    if (c > 1900) { d = new Date(c, a - 1, b); if (!isNaN(d.getTime())) return d; }
+    // If year is 4 digits in position 0
+    if (a > 1900) { d = new Date(a, b - 1, c); if (!isNaN(d.getTime())) return d; }
+  }
+  return null;
+}
+
+var MONTHS = ['January','February','March','April','May','June',
+              'July','August','September','October','November','December'];
+
+function formatDate(str) {
+  var d = parseDate(str);
+  if (!d) return str || null;
+  return MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+function calcAge(str) {
+  var d = parseDate(str);
+  if (!d) return null;
+  var today = new Date();
+  var age = today.getFullYear() - d.getFullYear();
+  var m = today.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+  return age >= 0 && age < 120 ? age : null;
+}
+
+function yearsBetween(str1, str2) {
+  var d1 = parseDate(str1), d2 = parseDate(str2);
+  if (!d1 || !d2) return null;
+  var yrs = Math.round(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24 * 365.25));
+  return yrs;
+}
+
+// ── Build field value display ──────────────────────────────────
+
+function buildFieldVal(rec, f) {
+  var raw = rec[f.key];
+  var val, sub;
+
+  if (f.type === 'birthday') {
+    val = formatDate(raw);
+    var age = calcAge(raw);
+    sub = age !== null ? age + ' years old' : null;
+  } else if (f.type === 'date') {
+    val = formatDate(raw);
+    sub = null;
+    // For latest appointment, show years of service from original
+    if (f.key === 'appointmentLatest' && rec.appointmentOriginal && raw) {
+      var yrs = yearsBetween(rec.appointmentOriginal, raw);
+      if (yrs !== null) sub = yrs + ' year' + (yrs !== 1 ? 's' : '') + ' since original appointment';
+    }
+  } else {
+    val = raw && String(raw).trim() ? String(raw).trim() : null;
+    sub = null;
+  }
+
+  if (!val) {
+    return '<div style="font-size:13px;color:var(--text-3);padding:7px 10px;background:var(--surface-2);border:1px dashed var(--border);border-radius:var(--radius-sm);font-style:italic;">Not provided</div>';
+  }
+
+  var html = '<div style="padding:7px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);">';
+  html += '<div style="font-size:13.5px;color:var(--text-1);font-weight:500;">' + esc(val) + '</div>';
+  if (sub) {
+    html += '<div style="font-size:11.5px;color:var(--text-3);margin-top:3px;font-weight:500;">' + esc(sub) + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// ── openView ───────────────────────────────────────────────────
+
+function openView(id) {
+  var rec = records.find(function(r) { return r.id === id; });
+  if (!rec) return;
+
+  document.getElementById('view-modal-title').textContent = rec.nameOfTeacher || 'Teacher Details';
+  document.getElementById('view-edit-btn').onclick = function() {
+    closeModal('view-modal');
+    openEdit(id);
+  };
+
+  var schoolType = getSchoolType(rec.nameOfSchool);
+  var typeTag = schoolType === 'secondary'
+    ? '<span style="display:inline-block;padding:2px 10px;border-radius:100px;background:var(--purple-light);color:var(--purple);font-size:11px;font-weight:700;margin-left:8px;">Secondary</span>'
+    : '<span style="display:inline-block;padding:2px 10px;border-radius:100px;background:#D1FAE5;color:#047857;font-size:11px;font-weight:700;margin-left:8px;">Elementary</span>';
+
+  var html = '<div style="padding:1rem 1.5rem 0;">';
+
+  // Header card
+  html += '<div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:14px;">';
+  html += '<div style="width:48px;height:48px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;color:var(--blue);flex-shrink:0;font-size:20px;font-weight:700;">' + esc((rec.nameOfTeacher || '?').charAt(0).toUpperCase()) + '</div>';
+  html += '<div><div style="font-size:16px;font-weight:700;color:var(--text-1);">' + esc(rec.nameOfTeacher || '—') + typeTag + '</div>';
+  html += '<div style="font-size:13px;color:var(--text-2);margin-top:2px;">' + esc(rec.nameOfSchool || '—') + '</div>';
+  html += '<div style="font-size:12px;color:var(--text-3);margin-top:2px;">' + esc(rec.presentPosition || '—') + '</div></div></div>';
+
+  FIELD_SECTIONS.forEach(function(section) {
+    html += '<div style="margin-bottom:1.25rem;">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--border);">';
+    html += '<div style="width:24px;height:24px;background:var(--blue-light);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--blue);"><svg style="width:13px;height:13px;"><use href="#' + section.icon + '"/></svg></div>';
+    html += '<span style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;">' + esc(section.title) + '</span>';
+    html += '</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.625rem .75rem;">';
+    section.fields.forEach(function(f) {
+      var spanStyle = f.full ? 'grid-column:1/-1;' : '';
+      html += '<div style="' + spanStyle + '">';
+      html += '<div style="font-size:10.5px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">' + esc(f.label) + '</div>';
+      html += buildFieldVal(rec, f);
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+
+  html += '</div>';
+  document.getElementById('view-modal-body').innerHTML = html;
+  openModal('view-modal');
+}
+
+// ── START ─────────────────────────────────────────────────────
+init();
+
+// ═══════════════════════════════════════════════════════════════
+// IMPORT FEATURE
+// ═══════════════════════════════════════════════════════════════
+
+const SYSTEM_FIELDS = [
+  { field: 'nameOfTeacher',       label: 'Name of Teacher',           required: true,  keywords: ['name of teacher','teacher name','name teacher'] },
+  { field: 'nameOfSchool',        label: 'Name of School',            required: true,  keywords: ['name of school','school name','school'] },
+  { field: 'birthday',            label: 'Birthday',                  required: false, keywords: ['birthday','birth date','date of birth','dob','bdate'] },
+  { field: 'employeeNo',          label: 'Employee No.',              required: false, keywords: ['employee no','employee number','emp no','empno','employee #'] },
+  { field: 'itemNo',              label: 'Item No.',                  required: false, keywords: ['item no','item number','item #','itemno'] },
+  { field: 'bpNo',                label: 'BP No.',                    required: false, keywords: ['bp no','bp number','bp#','bpno'] },
+  { field: 'gsisNo',              label: 'GSIS No.',                  required: false, keywords: ['gsis no','gsis number','gsis#','gsis'] },
+  { field: 'umidNo',              label: 'UMID No.',                  required: false, keywords: ['umid no','umid number','umid#','umid'] },
+  { field: 'philHealthNo',        label: 'PhilHealth No.',            required: false, keywords: ['philhealth no','philhealth number','philhealth#','philhealth'] },
+  { field: 'tinNo',               label: 'TIN No.',                   required: false, keywords: ['tin no','tin number','tin#','tin'] },
+  { field: 'appointmentOriginal', label: 'Appointment (Original)',    required: false, keywords: ['date of original','original appointment','original date','appointment.*original'] },
+  { field: 'appointmentLatest',   label: 'Appointment (Latest)',      required: false, keywords: ['date of latest','latest appointment','latest date','appointment.*latest'] },
+  { field: 'presentPosition',     label: 'Present Position',          required: false, keywords: ['present position','position','current position'] },
+  { field: 'pagibigMidNo',        label: 'PAGIBIG MID No.',           required: false, keywords: ['pagibig mid','pag-ibig mid','pagibig','pag-ibig','hdmf'] },
+  { field: 'accountNo',           label: 'Account Number',            required: false, keywords: ['account no','account number','account#','acct no'] },
+  { field: 'remarks',             label: 'Remarks',                   required: false, keywords: ['remarks','remark','notes','note','comment'] },
+];
+
+let importStep = 1;
+let importRows = [];      // all parsed rows (arrays)
+let importHeaders = [];   // detected header row (strings)
+let importDataRows = [];  // rows after the header
+let importMapping = {};   // { systemField: csvColumnIndex }
+
+// ── Parse CSV ──────────────────────────────────────────────────
+
+function parseCSV(text) {
+  // Normalize line endings then split
+  var cr = String.fromCharCode(13);
+  var lf = String.fromCharCode(10);
+  var crlf = cr + lf;
+  var normalized = text.split(crlf).join(lf).split(cr).join(lf);
+  var lines = normalized.split(lf);
+
+  // Auto-detect separator
+  var sample = lines.slice(0, 5).join(lf);
+  var tabCount   = (sample.match(/\t/g)  || []).length;
+  var commaCount = (sample.match(/,/g)   || []).length;
+  var semiCount  = (sample.match(/;/g)   || []).length;
+  var sep = tabCount > commaCount ? '\t' : (semiCount > commaCount ? ';' : ',');
+
+  return lines.map(function(line) {
+    if (!line.trim()) return null;
+    var fields = [];
+    var cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var c = line[i];
+      if (c === '"') {
+        if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (c === sep && !inQ) {
+        fields.push(cur.trim().replace(/^"|"$/g, ''));
+        cur = '';
+      } else { cur += c; }
+    }
+    fields.push(cur.trim().replace(/^"|"$/g, ''));
+    return fields;
+  }).filter(Boolean);
+}
+
+// ── Find header row ────────────────────────────────────────────
+// Scans first 20 rows, returns the index of the row that best
+// matches teacher record header keywords. This handles the
+// "stray row at top" problem.
+
+function findHeaderRowIndex(rows) {
+  const anchors = ['teacher','school','gsis','birthday','employee','position','philhealth','tin'];
+  let best = 0, bestScore = 0;
+  rows.slice(0, 25).forEach((row, i) => {
+    const joined = row.join(' ').toLowerCase();
+    const score = anchors.filter(k => joined.includes(k)).length;
+    if (score > bestScore) { bestScore = score; best = i; }
+  });
+  return best;
+}
+
+// ── Auto-map columns ───────────────────────────────────────────
+
+function autoMapColumns(headers) {
+  const mapping = {};
+  const used = new Set();
+
+  SYSTEM_FIELDS.forEach(({ field, keywords }) => {
+    for (const kw of keywords) {
+      const regex = new RegExp(kw, 'i');
+      const idx = headers.findIndex((h, i) => !used.has(i) && regex.test(h));
+      if (idx !== -1) {
+        mapping[field] = idx;
+        used.add(idx);
+        break;
+      }
+    }
+    // If no keyword match, leave unmapped (will show as "(skip)")
+  });
+
+  // Special case: "remarks" — if not found by keywords, use the last non-empty column
+  // that isn't already mapped (the "text on the right" in their Excel)
+  if (mapping['remarks'] === undefined) {
+    const lastCols = [...headers.keys()].reverse();
+    for (const i of lastCols) {
+      if (!used.has(i) && headers[i] && headers[i].length > 0) {
+        // Check if it looks like a remarks column (long text or explicit keyword)
+        const h = headers[i].toLowerCase();
+        if (!h.match(/no$|number|date|male|female|total/)) {
+          mapping['remarks'] = i;
+          used.add(i);
+          break;
+        }
+      }
+    }
+  }
+
+  return mapping;
+}
+
+// ── Open/close import ──────────────────────────────────────────
+
+// Stores filePath for multi-sheet Excel
+let importExcelFilePath = null;
+
+function openImport() {
+  importStep = 1;
+  importRows = [];
+  importHeaders = [];
+  importDataRows = [];
+  importMapping = {};
+  importExcelFilePath = null;
+  goToStep(1);
+  document.getElementById('file-selected-label').style.display = 'none';
+  document.getElementById('sheet-picker').style.display = 'none';
+  document.getElementById('import-next-btn').disabled = true;
+  document.getElementById('import-next-btn').textContent = 'Next →';
+  document.getElementById('import-back-btn').style.display = 'none';
+  document.getElementById('import-progress').style.display = 'none';
+  openModal('import-modal');
+}
+
+function closeImport() { closeModal('import-modal'); }
+
+// ── Browse file via Electron dialog ───────────────────────────
+
+async function browseFile() {
+  if (!window.api || !window.api.importOpenFile) {
+    alert('Import is only available in the desktop app.');
+    return;
+  }
+
+  const result = await window.api.importOpenFile();
+
+  if (!result || result.cancelled) return;
+
+  if (result.error) {
+    alert('Could not open file: ' + result.error);
+    return;
+  }
+
+  const lbl = document.getElementById('file-selected-label');
+
+  if (result.type === 'csv') {
+    // Parse CSV text in the renderer
+    const rows = parseCSV(result.text);
+    loadRowsIntoImporter(rows, result.fileName);
+
+  } else if (result.type === 'excel') {
+    // Single sheet — rows already returned
+    loadRowsIntoImporter(result.rows, result.fileName + ' [' + result.sheetName + ']');
+
+  } else if (result.type === 'excel-pick-sheet') {
+    // Multiple sheets — show sheet picker
+    importExcelFilePath = result.filePath;
+    const picker = document.getElementById('sheet-picker');
+    const sel    = document.getElementById('sheet-select');
+
+    sel.innerHTML = result.sheetNames.map(s =>
+      '<option value="' + s + '">' + s + '</option>'
+    ).join('');
+
+    picker.style.display = 'block';
+    lbl.textContent = '✓  "' + result.fileName + '" — ' + result.sheetNames.length + ' worksheets found. Select one below.';
+    lbl.style.display = 'block';
+
+    // Enable Next only after sheet is chosen — will load on Next click
+    document.getElementById('import-next-btn').disabled = false;
+    // Override next to load the sheet first
+    document.getElementById('import-next-btn').onclick = async function() {
+      const sheetName = document.getElementById('sheet-select').value;
+      const r = await window.api.importGetSheet(importExcelFilePath, sheetName);
+      if (r.error) { alert('Could not read sheet: ' + r.error); return; }
+      loadRowsIntoImporter(r.rows, result.fileName + ' [' + sheetName + ']');
+      // Restore normal next handler and advance
+      document.getElementById('import-next-btn').onclick = importNext;
+      buildMappingUI();
+      goToStep(2);
+    };
+  }
+}
+
+function loadRowsIntoImporter(rows, label) {
+  const filtered = rows.filter(function(r) {
+    return r && r.some(function(c) { return String(c).trim(); });
+  });
+  if (!filtered.length) { alert('No data found in the file.'); return; }
+
+  const hdrIdx   = findHeaderRowIndex(filtered);
+  importHeaders  = filtered[hdrIdx].map(function(c) { return String(c); });
+  importDataRows = filtered.slice(hdrIdx + 1).filter(function(r) {
+    return r.some(function(c) { return String(c).trim(); });
+  });
+  importMapping  = autoMapColumns(importHeaders);
+
+  const lbl = document.getElementById('file-selected-label');
+  lbl.textContent = '✓  "' + label + '" — ' + importDataRows.length + ' data rows found (header on row ' + (hdrIdx + 1) + ')';
+  lbl.style.display = 'block';
+  document.getElementById('sheet-picker').style.display = 'none';
+  document.getElementById('import-next-btn').disabled = false;
+  document.getElementById('import-next-btn').onclick = importNext;
+}
+
+function goToStep(step) {
+  importStep = step;
+  [1,2,3].forEach(s => {
+    document.getElementById(`import-step-${s}`).classList.toggle('active', s === step);
+    const dot   = document.getElementById(`sdot-${s}`);
+    const label = document.getElementById(`slabel-${s}`);
+    dot.classList.toggle('active', s === step);
+    dot.classList.toggle('done',   s < step);
+    label.classList.toggle('active', s === step);
+  });
+  document.getElementById('import-back-btn').style.display = step > 1 ? '' : 'none';
+  const nextBtn = document.getElementById('import-next-btn');
+  if (step === 3) {
+    nextBtn.innerHTML = '<svg class="icon"><use href="#i-check"/></svg> Import Records';
+    nextBtn.className = 'btn btn-teal';
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.className = 'btn btn-primary';
+  }
+}
+
+function importGoBack() {
+  if (importStep > 1) goToStep(importStep - 1);
+}
+
+// ── Step navigation ────────────────────────────────────────────
+
+function importNext() {
+  if (importStep === 1) {
+    if (!importRows.length) return;
+    buildMappingUI();
+    goToStep(2);
+    document.getElementById('import-next-btn').disabled = false;
+  } else if (importStep === 2) {
+    collectMapping();
+    buildPreviewUI();
+    goToStep(3);
+  } else if (importStep === 3) {
+    runImport();
+  }
+}
+
+// ── Drag/drop removed — using Electron file dialog instead ──
+
+// ── Step 2: Mapping UI ─────────────────────────────────────────
+
+function buildMappingUI() {
+  document.getElementById('mapping-info').textContent =
+    `${importDataRows.length} data rows detected · ${importHeaders.length} columns found · ${Object.keys(importMapping).length} auto-matched`;
+
+  const options = ['<option value="-1">(skip / leave blank)</option>',
+    ...importHeaders.map((h, i) => `<option value="${i}">${esc(h || `Column ${i+1}`)}</option>`)
+  ].join('');
+
+  const tbody = document.getElementById('mapping-tbody');
+  tbody.innerHTML = SYSTEM_FIELDS.map(({ field, label, required }) => {
+    const matched = importMapping[field] !== undefined;
+    const selVal  = matched ? importMapping[field] : -1;
+    const badge   = matched
+      ? `<span class="match-badge">auto-detected</span>`
+      : (required ? `<span class="match-badge warn">required</span>` : '');
+    return `
+      <tr>
+        <td class="field-label">
+          ${esc(label)}${required ? '<span class="field-req">*</span>' : ''}
+          ${badge}
+        </td>
+        <td>
+          <select id="map-${field}" onchange="importMapping['${field}']=parseInt(this.value)">
+            ${options.replace(`value="${selVal}"`, `value="${selVal}" selected`)}
+          </select>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function collectMapping() {
+  SYSTEM_FIELDS.forEach(({ field }) => {
+    const sel = document.getElementById(`map-${field}`);
+    if (sel) {
+      const v = parseInt(sel.value);
+      importMapping[field] = v === -1 ? undefined : v;
+    }
+  });
+}
+
+// ── Step 3: Preview UI ─────────────────────────────────────────
+
+function buildPreviewUI() {
+  const previewRows = importDataRows.slice(0, 6);
+  const mappedFields = SYSTEM_FIELDS.filter(f => importMapping[f.field] !== undefined);
+
+  document.getElementById('preview-count-msg').textContent =
+    `Ready to import ${importDataRows.length} record${importDataRows.length!==1?'s':''} · Showing first ${Math.min(6,importDataRows.length)} rows`;
+
+  const tbl = document.getElementById('preview-table');
+  tbl.innerHTML = `
+    <thead><tr>
+      ${mappedFields.map(f => `<th>${esc(f.label)}</th>`).join('')}
+    </tr></thead>
+    <tbody>
+      ${previewRows.map(row => `
+        <tr>${mappedFields.map(f => {
+          const idx = importMapping[f.field];
+          const val = (idx !== undefined && row[idx] !== undefined) ? row[idx] : '';
+          return `<td title="${esc(val)}">${esc(val) || '<span style="color:var(--text-3)">—</span>'}</td>`;
+        }).join('')}</tr>
+      `).join('')}
+    </tbody>`;
+}
+
+// ── Run import ─────────────────────────────────────────────────
+
+async function runImport() {
+  const btn = document.getElementById('import-next-btn');
+  btn.disabled = true;
+  document.getElementById('import-progress').style.display = 'block';
+  document.getElementById('import-back-btn').style.display = 'none';
+
+  const total   = importDataRows.length;
+  const bar     = document.getElementById('import-progress-bar');
+  const statusEl = document.getElementById('import-status-text');
+
+  let imported = 0, skipped = 0;
+
+  for (let i = 0; i < importDataRows.length; i++) {
+    const row = importDataRows[i];
+    const record = {};
+
+    SYSTEM_FIELDS.forEach(({ field }) => {
+      const idx = importMapping[field];
+      if (idx !== undefined && row[idx] !== undefined) {
+        record[field] = row[idx].trim();
+      } else {
+        record[field] = '';
+      }
+    });
+
+    // Skip completely empty rows
+    if (!record.nameOfTeacher && !record.nameOfSchool) { skipped++; continue; }
+
+    try {
+      if (window.api) {
+        const result = await window.api.add(record);
+        record.id = result.id;
+        record.createdAt = new Date().toISOString();
+      } else {
+        record.id = Date.now() + i;
+        record.createdAt = new Date().toISOString();
+      }
+      records.push(record);
+      imported++;
+    } catch(e) { skipped++; }
+
+    // Update progress
+    const pct = Math.round(((i+1) / total) * 100);
+    bar.style.width = pct + '%';
+    statusEl.textContent = `Importing… ${i+1} of ${total}`;
+
+    // Yield to UI every 10 records
+    if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+  }
+
+  bar.style.width = '100%';
+  statusEl.className = 'import-status import-done';
+  statusEl.textContent = `✓ Done! ${imported} record${imported!==1?'s':''} imported${skipped?' · '+skipped+' skipped':''}`;
+  btn.textContent = 'Close';
+  btn.className = 'btn btn-primary';
+  btn.disabled = false;
+  btn.onclick = () => { closeImport(); renderTable(); };
+  renderTable();
+}
+
+</script>
+</body>
+</html>

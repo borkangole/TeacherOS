@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
+<title>Enrollment — Teacher Records System</title>
+<style>
+:root {
+  --navy:#0C1E3E; --blue:#1A52C4; --blue-hover:#143FA0; --blue-light:#EBF0FD; --blue-muted:#BFCFF8;
+  --teal:#0D7A6B; --teal-light:#E6F7F5; --teal-dark:#0a6558;
+  --gold:#D4960A; --gold-light:#FFF8E6;
+  --bg:#EEF1F6; --surface:#FFFFFF; --surface-2:#F7F9FC;
+  --border:#DDE3EE; --border-2:#C8D1E0;
+  --text-1:#0F1C2E; --text-2:#4A5568; --text-3:#8A96A8;
+  --red:#C8291A; --red-light:#FEF2F2; --red-muted:#FBCBC9;
+  --green:#1A8A5A; --green-light:#F0FDF5;
+  --purple:#6D28D9; --purple-light:#F5F3FF;
+  --orange:#C2520A; --orange-light:#FFF7ED;
+  --male:#1A52C4; --male-bg:#EBF0FD;
+  --female:#9D174D; --female-bg:#FDF2F8;
+  --radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-xl:18px;
+  --shadow-sm:0 1px 3px rgba(12,30,62,.08),0 1px 2px rgba(12,30,62,.04);
+  --shadow-md:0 4px 16px rgba(12,30,62,.10),0 1px 4px rgba(12,30,62,.06);
+  --shadow-lg:0 20px 60px rgba(12,30,62,.18),0 4px 16px rgba(12,30,62,.08);
+  --font:'Segoe UI Variable','Segoe UI',system-ui,-apple-system,sans-serif;
+  --sb-w:224px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:var(--font);background:var(--bg);color:var(--text-1);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+.icon{display:inline-block;width:16px;height:16px;flex-shrink:0;vertical-align:middle;}
+.icon-sm{width:14px;height:14px;} .icon-md{width:18px;height:18px;}
+
+/* ── LAYOUT ─────────────────────────────────── */
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* ── SIDEBAR ────────────────────────────────── */
+.sidebar{width:var(--sb-w);flex-shrink:0;background:var(--navy);background-image:radial-gradient(circle,rgba(255,255,255,.025) 1px,transparent 1px);background-size:20px 20px;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.06);overflow-y:auto;overflow-x:hidden;}
+.sidebar::-webkit-scrollbar{width:0;}
+.sb-brand{padding:1.25rem 1rem 1rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;}
+.sb-brand-icon{width:38px;height:38px;flex-shrink:0;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:#fff;}
+.sb-brand-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.2;}
+.sb-brand-sub{font-size:11px;color:rgba(255,255,255,.38);margin-top:1px;}
+.sb-section{padding:.875rem 1rem .375rem;font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;flex-shrink:0;}
+.sb-nav{padding:0 .5rem;display:flex;flex-direction:column;gap:2px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:.625rem .75rem;border-radius:var(--radius-md);color:rgba(255,255,255,.55);font-size:13px;font-weight:500;text-decoration:none;border-left:2px solid transparent;border-top:none;border-right:none;border-bottom:none;background:none;font-family:var(--font);width:100%;text-align:left;cursor:pointer;transition:background .12s,color .12s;}
+.sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);}
+.sb-item.active{background:rgba(255,255,255,.11);color:#fff;font-weight:600;border-left-color:var(--gold);}
+.sb-item-icon{width:30px;height:30px;flex-shrink:0;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);transition:background .12s;}
+.sb-item.active .sb-item-icon{background:rgba(212,150,10,.25);}
+.sb-item:hover .sb-item-icon{background:rgba(255,255,255,.1);}
+.sb-spacer{flex:1;}
+.sb-footer{padding:.875rem 1rem;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0;}
+.sb-footer-label{font-size:10px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.sb-footer-path{font-family:'Cascadia Code','Consolas',monospace;font-size:10px;color:rgba(255,255,255,.3);word-break:break-all;line-height:1.4;margin-bottom:8px;}
+.sb-footer-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--radius-sm);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);font-size:11.5px;font-weight:500;font-family:var(--font);cursor:pointer;transition:background .12s,color .12s;}
+.sb-footer-btn:hover{background:rgba(255,255,255,.13);color:rgba(255,255,255,.9);}
+
+/* ── MAIN ───────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+/* ── TOPBAR ─────────────────────────────────── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:1rem;box-shadow:var(--shadow-sm);}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.topbar-icon{width:34px;height:34px;background:var(--teal-light);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--teal);flex-shrink:0;}
+.topbar-title{font-size:16px;font-weight:700;color:var(--text-1);letter-spacing:-.02em;line-height:1.2;}
+.topbar-sub{font-size:12px;color:var(--text-3);margin-top:1px;}
+
+/* ── BUTTONS ────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s,transform .08s;white-space:nowrap;line-height:1;text-decoration:none;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff;}
+.btn-primary:hover{background:var(--blue-hover);}
+.btn-teal{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600;}
+.btn-teal:hover{background:var(--teal-dark);}
+.btn-gold{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600;}
+.btn-gold:hover{background:#c08909;}
+.btn-ghost{background:var(--surface-2);border-color:var(--border-2);color:var(--text-2);}
+.btn-ghost:hover{background:var(--surface);color:var(--text-1);}
+.btn-danger{background:var(--red);border-color:var(--red);color:#fff;}
+.btn-danger:hover{background:#ab2117;}
+.btn-outline-blue{background:var(--surface);border-color:var(--border-2);color:var(--blue);}
+.btn-outline-blue:hover{background:var(--blue-light);border-color:var(--blue-muted);}
+.btn-outline-danger{background:var(--surface);border-color:var(--red-muted);color:var(--red);}
+.btn-outline-danger:hover{background:var(--red-light);}
+.btn-sm{padding:5px 10px;font-size:12px;gap:5px;}
+.btn-icon{padding:6px;border-radius:var(--radius-sm);line-height:0;}
+
+/* ── FILTER BAR ─────────────────────────────── */
+.filter-bar{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:.625rem 1.5rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1.5rem;
+  flex-shrink:0;
+}
+.filter-left{display:flex;align-items:center;gap:6px;}
+.filter-right{display:flex;align-items:center;gap:8px;}
+
+/* Segmented control */
+.seg-ctrl{
+  display:inline-flex;
+  background:var(--surface-2);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-xl);
+  padding:3px;
+  gap:2px;
+}
+.seg-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;
+  font-size:12.5px;font-weight:500;font-family:var(--font);
+  color:var(--text-3);
+  cursor:pointer;
+  border:none;
+  background:transparent;
+  border-radius:calc(var(--radius-xl) - 2px);
+  transition:all .18s;
+  white-space:nowrap;
+  line-height:1.4;
+  outline:none;
+}
+.seg-btn:hover:not(.seg-active){background:rgba(0,0,0,.04);color:var(--text-2);}
+.seg-btn.seg-active{
+  background:var(--surface);
+  color:var(--text-1);
+  font-weight:650;
+  box-shadow:0 1px 6px rgba(12,30,62,.12),0 1px 2px rgba(12,30,62,.06);
+}
+.seg-btn.seg-active.all-tab  { color:var(--teal); }
+.seg-btn.seg-active.elem-tab { color:#047857; }
+.seg-btn.seg-active.sec-tab  { color:var(--purple); }
+
+.seg-pill{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:20px;height:17px;padding:0 6px;
+  border-radius:100px;font-size:10.5px;font-weight:700;
+  background:rgba(0,0,0,.06);color:var(--text-3);
+  transition:all .18s;
+}
+.seg-btn.seg-active .seg-pill{background:rgba(0,0,0,.08);color:inherit;}
+
+/* SY + search */
+.sy-wrap{display:flex;align-items:center;gap:7px;}
+.sy-label{font-size:12px;font-weight:600;color:var(--text-3);white-space:nowrap;letter-spacing:.01em;text-transform:uppercase;}
+select.sy-select{
+  height:32px;padding:0 26px 0 10px;
+  border:1.5px solid var(--border);border-radius:var(--radius-md);
+  font-family:var(--font);font-size:12.5px;font-weight:500;color:var(--text-1);
+  background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238A96A8' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 8px center;
+  -webkit-appearance:none;outline:none;cursor:pointer;
+  transition:border-color .15s,box-shadow .15s;
+}
+select.sy-select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,122,107,.1);}
+
+.search-box{position:relative;}
+.search-box .s-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none;}
+.search-box input{
+  height:32px;width:220px;padding:0 10px 0 32px;
+  border:1.5px solid var(--border);border-radius:var(--radius-md);
+  font-family:var(--font);font-size:12.5px;color:var(--text-1);
+  background:var(--surface);outline:none;
+  transition:border-color .15s,box-shadow .15s,width .2s;
+}
+.search-box input::placeholder{color:var(--text-3);}
+.search-box input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,122,107,.1);width:280px;}
+
+/* ── STATS BAR ──────────────────────────────── */
+.stats-row{display:flex;gap:1px;background:var(--border);border-bottom:1px solid var(--border);flex-shrink:0;}
+.stat-card{flex:1;background:var(--surface);padding:.625rem 1.5rem;display:flex;align-items:center;gap:10px;}
+.stat-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stat-icon.teal   {background:var(--teal-light);color:var(--teal);}
+.stat-icon.blue   {background:var(--male-bg);color:var(--male);}
+.stat-icon.female {background:var(--female-bg);color:var(--female);}
+.stat-icon.green  {background:var(--green-light);color:var(--green);}
+.stat-text{display:flex;flex-direction:column;gap:1px;}
+.stat-label{font-size:10.5px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;line-height:1;}
+.stat-value{font-size:20px;font-weight:750;color:var(--text-1);line-height:1.25;letter-spacing:-.03em;}
+
+/* ── TABLE AREA ─────────────────────────────── */
+.content{flex:1;overflow-y:auto;padding:1.25rem 1.5rem;}
+.content::-webkit-scrollbar{width:6px;}
+.content::-webkit-scrollbar-track{background:transparent;}
+.content::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px;}
+
+.table-card{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;}
+.table-scroll{overflow-x:auto;}
+.table-scroll::-webkit-scrollbar{height:6px;}
+.table-scroll::-webkit-scrollbar-track{background:var(--surface-2);}
+.table-scroll::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px;}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap;}
+
+/* Grade header row */
+.g-head tr.row1 th{
+  padding:7px 10px;text-align:center;
+  font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  color:rgba(255,255,255,.9);border-right:1px solid rgba(255,255,255,.1);
+}
+.g-head th.th-school{background:var(--navy);text-align:left;padding-left:14px;min-width:170px;position:sticky;left:0;z-index:2;}
+.g-head th.th-sy    {background:var(--navy);min-width:85px;}
+.g-head th.th-kinder{background:#047857;}
+.g-head th.th-g1    {background:#1D4ED8;}
+.g-head th.th-g2    {background:#7C3AED;}
+.g-head th.th-g3    {background:#B45309;}
+.g-head th.th-g4    {background:#0E7490;}
+.g-head th.th-g5    {background:#9D174D;}
+.g-head th.th-g6    {background:#4D7C0F;}
+.g-head th.th-sped  {background:#374151;}
+.g-head th.th-g7    {background:#1D4ED8;}
+.g-head th.th-g8    {background:#7C3AED;}
+.g-head th.th-g9    {background:#B45309;}
+.g-head th.th-g10   {background:#0E7490;}
+.g-head th.th-g11   {background:#9D174D;}
+.g-head th.th-g12   {background:#4D7C0F;}
+.g-head th.th-total {background:#0f2b52;}
+.g-head th.th-act   {background:var(--navy);}
+
+/* Sub-header (M/F/Total) */
+.g-head tr.row2 th{
+  padding:5px 8px;text-align:center;
+  font-size:10px;font-weight:700;letter-spacing:.04em;
+  background:var(--surface-2);color:var(--text-3);
+  border-bottom:2px solid var(--border);border-right:1px solid var(--border);
+  text-transform:uppercase;
+}
+.g-head tr.row2 th.sub-school{text-align:left;padding-left:14px;position:sticky;left:0;z-index:2;background:var(--surface-2);}
+.g-head tr.row2 th.sub-m{color:var(--male);}
+.g-head tr.row2 th.sub-f{color:var(--female);}
+.g-head tr.row2 th.sub-t{font-weight:800;color:var(--text-2);}
+.g-head tr.row2 th.sub-gm{color:var(--male);font-weight:800;min-width:64px;}
+.g-head tr.row2 th.sub-gf{color:var(--female);font-weight:800;min-width:64px;}
+.g-head tr.row2 th.sub-gt{color:var(--green);font-weight:800;min-width:72px;}
+
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#F4F8FF;}
+tbody tr:hover td.td-school{background:#F4F8FF;}
+
+td{padding:9px 10px;color:var(--text-2);text-align:center;vertical-align:middle;border-right:1px solid var(--border);}
+td:last-child{border-right:none;}
+td.td-school{text-align:left;padding-left:14px;font-weight:600;color:var(--text-1);font-size:13px;position:sticky;left:0;background:var(--surface);z-index:1;min-width:170px;max-width:210px;overflow:hidden;text-overflow:ellipsis;}
+td.td-sy{font-size:11.5px;color:var(--text-3);font-weight:500;}
+td.num{font-variant-numeric:tabular-nums;}
+td.m-num{color:var(--male);}
+td.f-num{color:var(--female);}
+td.t-num{font-weight:700;color:var(--text-1);background:rgba(0,0,0,.015);}
+td.gm-num{font-weight:700;color:var(--male);font-size:13px;}
+td.gf-num{font-weight:700;color:var(--female);font-size:13px;}
+td.gt-num{font-weight:800;color:var(--green);font-size:14px;background:var(--green-light);}
+td.td-act{text-align:right;white-space:nowrap;border-right:none;}
+.act-group{display:inline-flex;gap:4px;}
+.td-nil{color:var(--border-2);font-size:11px;}
+
+/* empty state */
+.empty-state{padding:4rem 2rem;text-align:center;}
+.empty-icon{width:60px;height:60px;margin:0 auto 1.25rem;background:var(--surface-2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-3);border:1.5px dashed var(--border-2);}
+.empty-state h3{font-size:15px;font-weight:600;color:var(--text-1);margin-bottom:6px;}
+.empty-state p{font-size:13px;color:var(--text-3);margin-bottom:1.25rem;}
+
+/* ── MODAL ──────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(7,15,28,.55);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto;backdrop-filter:blur(3px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--radius-lg);width:100%;max-width:820px;margin:auto;box-shadow:var(--shadow-lg);border:1px solid var(--border);animation:mIn .18s cubic-bezier(.22,.68,0,1.2);}
+@keyframes mIn{from{opacity:0;transform:translateY(-10px) scale(.98);}to{opacity:1;transform:none;}}
+.modal-hd{background:var(--navy);background-image:radial-gradient(circle,rgba(255,255,255,.03) 1px,transparent 1px);background-size:20px 20px;padding:1.125rem 1.5rem;border-radius:var(--radius-lg) var(--radius-lg) 0 0;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+.modal-hd-left{display:flex;align-items:center;gap:10px;}
+.modal-hd-icon{width:32px;height:32px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);}
+.modal-hd h2{font-size:15px;font-weight:600;color:#fff;}
+.modal-x{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);width:30px;height:30px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s;}
+.modal-x:hover{background:rgba(255,255,255,.18);color:#fff;}
+.modal-bd{padding:1.5rem;max-height:70vh;overflow-y:auto;}
+.modal-bd::-webkit-scrollbar{width:6px;}
+.modal-bd::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px;}
+.modal-ft{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:var(--surface-2);border-radius:0 0 var(--radius-lg) var(--radius-lg);}
+
+.form-section{margin-bottom:1.5rem;}
+.form-section:last-child{margin-bottom:0;}
+.sec-hd{display:flex;align-items:center;gap:8px;margin-bottom:1rem;padding-bottom:.625rem;border-bottom:1.5px solid var(--border);}
+.sec-hd-icon{width:26px;height:26px;background:var(--teal-light);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--teal);}
+.sec-hd span{font-size:11.5px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:11.5px;font-weight:600;color:var(--text-2);letter-spacing:.01em;}
+.form-group label .req{color:var(--red);margin-left:2px;}
+.form-group input{height:38px;padding:0 11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;font-family:var(--font);color:var(--text-1);background:var(--surface);outline:none;transition:border-color .15s,box-shadow .15s;}
+.form-group input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,122,107,.1);}
+.form-group input::placeholder{color:var(--text-3);}
+
+/* enrollment input grid */
+.enroll-grid{border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+.eg-head{display:grid;grid-template-columns:130px 1fr 1fr 1fr;background:var(--surface-2);border-bottom:1.5px solid var(--border);}
+.eg-head div{padding:7px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:center;border-right:1px solid var(--border);}
+.eg-head div:first-child{text-align:left;color:var(--text-3);}
+.eg-head div:last-child{border-right:none;}
+.eg-head .mh{color:var(--male);}
+.eg-head .fh{color:var(--female);}
+.eg-head .th{color:var(--text-2);}
+.eg-row{display:grid;grid-template-columns:130px 1fr 1fr 1fr;border-bottom:1px solid var(--border);transition:background .1s;}
+.eg-row:last-child{border-bottom:none;}
+.eg-row:hover{background:var(--surface-2);}
+.eg-row.total-row{background:var(--surface-2);border-top:2px solid var(--border-2);}
+.eg-label{padding:7px 12px;font-size:12.5px;font-weight:600;color:var(--text-1);display:flex;align-items:center;border-right:1px solid var(--border);background:rgba(0,0,0,.015);}
+.eg-dot{width:8px;height:8px;border-radius:50%;margin-right:8px;flex-shrink:0;}
+.eg-cell{padding:4px 8px;border-right:1px solid var(--border);display:flex;align-items:center;}
+.eg-cell:last-child{border-right:none;}
+.eg-cell input{width:100%;height:30px;padding:0 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;font-family:var(--font);font-weight:500;text-align:center;color:var(--text-1);background:var(--surface);outline:none;transition:border-color .15s,box-shadow .15s;}
+.eg-cell input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(26,82,196,.1);}
+.eg-cell input.mi:focus{border-color:var(--male);}
+.eg-cell input.fi:focus{border-color:var(--female);}
+.eg-cell input[readonly]{background:var(--surface-2);color:var(--text-2);font-weight:700;border-color:var(--border);cursor:default;}
+.total-row .eg-cell input[readonly]{background:var(--green-light);color:var(--green);font-weight:800;font-size:15px;}
+.total-row .eg-cell input[readonly].mi{background:var(--male-bg);color:var(--male);}
+.total-row .eg-cell input[readonly].fi{background:var(--female-bg);color:var(--female);}
+.total-row .eg-label{font-weight:700;}
+
+/* delete modal */
+.del-modal{background:var(--surface);border-radius:var(--radius-lg);width:100%;max-width:420px;margin:auto;box-shadow:var(--shadow-lg);overflow:hidden;border:1px solid var(--border);animation:mIn .18s cubic-bezier(.22,.68,0,1.2);}
+.del-top{padding:2rem 2rem 1.5rem;text-align:center;}
+.del-icon{width:60px;height:60px;background:var(--red-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.125rem;color:var(--red);border:2px solid var(--red-muted);}
+.del-top h3{font-size:17px;font-weight:700;color:var(--text-1);margin-bottom:8px;}
+.del-top p{font-size:13px;color:var(--text-2);line-height:1.6;}
+.del-ft{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:center;background:var(--surface-2);}
+
+/* toast */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text-1);color:white;padding:10px 16px;border-radius:var(--radius-md);font-size:13px;font-weight:500;z-index:999;opacity:0;transform:translateY(8px);transition:opacity .22s,transform .22s;pointer-events:none;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-md);}
+.toast.show{opacity:1;transform:none;}
+.toast-ok{color:#4ADE80;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<!-- SVG ICONS -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="ico-dash"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></symbol>
+  <symbol id="ico-records" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+  <symbol id="ico-enroll"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="ico-search"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="ico-plus"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="ico-dl"      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="ico-edit"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+  <symbol id="ico-trash"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+  <symbol id="ico-x"       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="ico-check"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="ico-alert"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="ico-inbox"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
+  <symbol id="ico-folder"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="ico-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="ico-male"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="5"/><line x1="21" y1="3" x2="15" y2="9"/><polyline points="15 3 21 3 21 9"/></symbol>
+  <symbol id="ico-female"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><line x1="12" y1="13" x2="12" y2="21"/><line x1="9" y1="17" x2="15" y2="17"/></symbol>
+</svg>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-icon"><img src="../assets/logo.png" alt="TeacherOS" style="width:26px;height:26px;object-fit:contain;"></div>
+      <div><div class="sb-brand-name">TeacherOS</div><div class="sb-brand-sub">DepEd Personnel</div></div>
+    </div>
+    <div class="sb-section">Navigation</div>
+    <div class="sb-nav">
+      <a href="dashboard.html" class="sb-item">
+        <span class="sb-item-icon"><svg class="icon icon-sm"><use href="#ico-dash"/></svg></span>Dashboard
+      </a>
+      <a href="index.html" class="sb-item">
+        <span class="sb-item-icon"><svg class="icon icon-sm"><use href="#ico-records"/></svg></span>Records
+      </a>
+      <a href="enrollment.html" class="sb-item active">
+        <span class="sb-item-icon"><svg class="icon icon-sm"><use href="#ico-enroll"/></svg></span>Enrollment
+      </a>
+    </div>
+    <div class="sb-spacer"></div>
+    <div class="sb-footer">
+      <div class="sb-footer-label">Data file</div>
+      <div class="sb-footer-path" id="db-path">Loading…</div>
+      <div style="display:flex;gap:6px;margin-top:2px;">
+        <button class="sb-footer-btn" onclick="window.api&&window.api.openDbFolder()" style="flex:1;">
+          <svg class="icon icon-sm"><use href="#ico-folder"/></svg>Open folder
+        </button>
+        <button class="sb-footer-btn" onclick="window.api&&window.api.authLogout()"
+          title="Sign out" style="background:rgba(200,41,26,.15);border-color:rgba(200,41,26,.3);color:rgba(255,100,80,.9);">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-icon"><svg class="icon icon-md"><use href="#ico-enroll"/></svg></div>
+        <div>
+          <div class="topbar-title">Enrollment</div>
+          <div class="topbar-sub" id="topbar-sub">Loading…</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="doExport()">
+          <svg class="icon"><use href="#ico-dl"/></svg>Export CSV
+        </button>
+        <button class="btn btn-gold btn-sm" onclick="openAdd()">
+          <svg class="icon"><use href="#ico-plus"/></svg>Add Record
+        </button>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <!-- Segmented school-type control -->
+      <div class="filter-left">
+        <div class="seg-ctrl">
+          <button class="seg-btn all-tab seg-active" id="tab-all" onclick="setType('all')">
+            All Schools <span class="seg-pill" id="cnt-all">0</span>
+          </button>
+          <button class="seg-btn elem-tab" id="tab-elem" onclick="setType('elementary')">
+            <svg class="icon icon-sm"><use href="#ico-building"/></svg>
+            Elementary <span class="seg-pill" id="cnt-elem">0</span>
+          </button>
+          <button class="seg-btn sec-tab" id="tab-sec" onclick="setType('secondary')">
+            <svg class="icon icon-sm"><use href="#ico-enroll"/></svg>
+            Secondary <span class="seg-pill" id="cnt-sec">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: SY + search + clear -->
+      <div class="filter-right">
+        <div class="sy-wrap">
+          <span class="sy-label">S.Y.</span>
+          <select class="sy-select" id="sy-filter" onchange="render()">
+            <option value="">All Years</option>
+          </select>
+        </div>
+        <div class="search-box">
+          <svg class="icon s-ico"><use href="#ico-search"/></svg>
+          <input type="text" id="q-input" placeholder="Search school…" oninput="render()">
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="clearF()">
+          <svg class="icon icon-sm"><use href="#ico-x"/></svg>Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon teal"><svg class="icon"><use href="#ico-building"/></svg></div>
+        <div class="stat-text"><span class="stat-label">Schools</span><span class="stat-value" id="st-schools">—</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue"><svg class="icon"><use href="#ico-male"/></svg></div>
+        <div class="stat-text"><span class="stat-label">Total Male</span><span class="stat-value" id="st-male">—</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon female"><svg class="icon"><use href="#ico-female"/></svg></div>
+        <div class="stat-text"><span class="stat-label">Total Female</span><span class="stat-value" id="st-female">—</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><svg class="icon"><use href="#ico-enroll"/></svg></div>
+        <div class="stat-text"><span class="stat-label">Grand Total</span><span class="stat-value" id="st-total">—</span></div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="content">
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead class="g-head" id="t-head"></thead>
+            <tbody id="t-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="m-form">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-hd-left">
+        <div class="modal-hd-icon"><svg class="icon"><use href="#ico-enroll"/></svg></div>
+        <h2 id="m-title">Add Enrollment Record</h2>
+      </div>
+      <button class="modal-x" onclick="closeM('m-form')"><svg class="icon icon-sm"><use href="#ico-x"/></svg></button>
+    </div>
+    <div class="modal-bd">
+      <div class="form-section">
+        <div class="sec-hd">
+          <div class="sec-hd-icon"><svg class="icon icon-sm"><use href="#ico-building"/></svg></div>
+          <span>School Information</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>School Year <span class="req">*</span></label>
+            <input type="text" id="f-sy" placeholder="e.g. 2025-2026" maxlength="20">
+          </div>
+          <div class="form-group">
+            <label>Name of School <span class="req">*</span></label>
+            <input type="text" id="f-name" placeholder="e.g. Cuartero Central School">
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="sec-hd">
+          <div class="sec-hd-icon"><svg class="icon icon-sm"><use href="#ico-enroll"/></svg></div>
+          <span>Enrollment by Grade Level</span>
+        </div>
+        <div class="enroll-grid">
+          <div class="eg-head">
+            <div>Grade Level</div>
+            <div class="mh">Male</div>
+            <div class="fh">Female</div>
+            <div class="th">Total</div>
+          </div>
+          <div id="grade-rows"></div>
+          <div class="eg-row total-row">
+            <div class="eg-label" style="font-weight:700;">Grand Total</div>
+            <div class="eg-cell"><input type="text" id="tot-m" readonly class="mi" placeholder="0"></div>
+            <div class="eg-cell"><input type="text" id="tot-f" readonly class="fi" placeholder="0"></div>
+            <div class="eg-cell"><input type="text" id="tot-g" readonly placeholder="0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeM('m-form')">Cancel</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveRec()">
+        <svg class="icon"><use href="#ico-check"/></svg>Save Record
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="m-del">
+  <div class="del-modal">
+    <div class="del-top">
+      <div class="del-icon"><svg class="icon icon-lg"><use href="#ico-alert"/></svg></div>
+      <h3>Delete Record?</h3>
+      <p id="del-msg">This will permanently delete this record.</p>
+    </div>
+    <div class="del-ft">
+      <button class="btn btn-ghost" onclick="closeM('m-del')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDel()">
+        <svg class="icon"><use href="#ico-trash"/></svg>Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><svg class="icon toast-ok"><use href="#ico-check"/></svg><span id="toast-msg"></span></div>
+
+<script>
+// ── Grade definitions ──────────────────────────────────────────
+const ELEM_G = [
+  {key:'kinder', label:'Kinder',  th:'th-kinder', color:'#047857'},
+  {key:'grade1', label:'Grade 1', th:'th-g1',     color:'#1D4ED8'},
+  {key:'grade2', label:'Grade 2', th:'th-g2',     color:'#7C3AED'},
+  {key:'grade3', label:'Grade 3', th:'th-g3',     color:'#B45309'},
+  {key:'grade4', label:'Grade 4', th:'th-g4',     color:'#0E7490'},
+  {key:'grade5', label:'Grade 5', th:'th-g5',     color:'#9D174D'},
+  {key:'grade6', label:'Grade 6', th:'th-g6',     color:'#4D7C0F'},
+  {key:'sped',   label:'SPED',    th:'th-sped',   color:'#374151'},
+];
+const SEC_G = [
+  {key:'grade7',  label:'Grade 7',       th:'th-g7',  color:'#1D4ED8'},
+  {key:'grade8',  label:'Grade 8',       th:'th-g8',  color:'#7C3AED'},
+  {key:'grade9',  label:'Grade 9',       th:'th-g9',  color:'#B45309'},
+  {key:'grade10', label:'Grade 10',      th:'th-g10', color:'#0E7490'},
+  {key:'grade11', label:'Grade 11 (SHS)',th:'th-g11', color:'#9D174D'},
+  {key:'grade12', label:'Grade 12 (SHS)',th:'th-g12', color:'#4D7C0F'},
+];
+const GRADES = ELEM_G; // for form
+
+let records = [], editId = null, deleteId = null, activeType = 'all';
+
+// ── Init ───────────────────────────────────────────────────────
+async function init() {
+  buildGradeRows();
+  if (window.api) {
+    records = await window.api.enrollmentGetAll();
+    const p = await window.api.getDbPath();
+    document.getElementById('db-path').textContent = p;
+  }
+  populateSY();
+  render();
+}
+
+function populateSY() {
+  const years = [...new Set(records.map(r=>r.schoolYear).filter(Boolean))].sort().reverse();
+  const sel = document.getElementById('sy-filter');
+  sel.innerHTML = '<option value="">All Years</option>' +
+    years.map(y=>`<option value="${y}">${y}</option>`).join('');
+}
+
+// ── Compute totals ─────────────────────────────────────────────
+function total(r, type) {
+  const gl = (type||r.schoolType||'elementary') === 'secondary' ? SEC_G : ELEM_G;
+  let m=0, f=0;
+  gl.forEach(g=>{ m+=(r[g.key+'_male']||0); f+=(r[g.key+'_female']||0); });
+  return {m, f, grand:m+f};
+}
+
+// ── Type filter ────────────────────────────────────────────────
+function setType(t) {
+  activeType = t;
+  ['all','elem','sec'].forEach(id => {
+    document.getElementById('tab-'+id).classList.toggle('seg-active',
+      (id==='all'&&t==='all')||(id==='elem'&&t==='elementary')||(id==='sec'&&t==='secondary')
+    );
+  });
+  render();
+}
+
+function updateCounts(pool) {
+  const e = pool.filter(r=>(r.schoolType||'elementary')==='elementary').length;
+  const s = pool.filter(r=>r.schoolType==='secondary').length;
+  document.getElementById('cnt-all').textContent  = pool.length;
+  document.getElementById('cnt-elem').textContent = e;
+  document.getElementById('cnt-sec').textContent  = s;
+}
+
+// ── Build table head ───────────────────────────────────────────
+function buildHead(gl) {
+  const g1 = gl.map(g=>`<th class="${g.th}" colspan="3">${g.label}</th>`).join('');
+  const g2 = gl.map(()=>`<th class="sub-m">M</th><th class="sub-f">F</th><th class="sub-t">T</th>`).join('');
+  return `
+    <tr class="row1">
+      <th class="th-school" rowspan="2">School Name</th>
+      <th class="th-sy" rowspan="2">S.Y.</th>
+      ${g1}
+      <th class="th-total" colspan="3">Grand Total</th>
+      <th class="th-act" rowspan="2">Actions</th>
+    </tr>
+    <tr class="row2">
+      <th class="sub-school" colspan="2" style="display:none"></th>
+      ${g2}
+      <th class="sub-gm">Male</th><th class="sub-gf">Female</th><th class="sub-gt">Grand</th>
+    </tr>`;
+}
+
+// ── Render ─────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function render() {
+  const sy = document.getElementById('sy-filter').value;
+  const q  = document.getElementById('q-input').value.toLowerCase().trim();
+
+  // All records matching SY + search (ignore type for counts)
+  const pool = records.filter(r=>
+    (!sy||r.schoolYear===sy)&&(!q||(r.schoolName||'').toLowerCase().includes(q))
+  );
+  updateCounts(pool);
+
+  // Filtered by type
+  const filtered = pool.filter(r=>
+    activeType==='all' || (r.schoolType||'elementary')===activeType
+  );
+
+  // Which grade list to show
+  const gl = activeType==='secondary' ? SEC_G : ELEM_G;
+
+  // Rebuild thead
+  document.getElementById('t-head').innerHTML = buildHead(gl);
+
+  // Stats
+  let sm=0, sf=0;
+  filtered.forEach(r=>{ const t=total(r); sm+=t.m; sf+=t.f; });
+  document.getElementById('st-schools').textContent = filtered.length;
+  document.getElementById('st-male').textContent    = sm.toLocaleString();
+  document.getElementById('st-female').textContent  = sf.toLocaleString();
+  document.getElementById('st-total').textContent   = (sm+sf).toLocaleString();
+
+  // Subtitle
+  const e = pool.filter(r=>(r.schoolType||'elementary')==='elementary').length;
+  const s = pool.filter(r=>r.schoolType==='secondary').length;
+  document.getElementById('topbar-sub').textContent = records.length===0
+    ? 'No records yet'
+    : `${e} elementary · ${s} secondary · ${(sm+sf).toLocaleString()} total students`;
+
+  const tbody = document.getElementById('t-body');
+  if (!filtered.length) {
+    const cols = gl.length*3+6;
+    tbody.innerHTML=`<tr><td colspan="${cols}" style="padding:0;border:none;"><div class="empty-state">
+      <div class="empty-icon"><svg style="width:26px;height:26px"><use href="#ico-inbox"/></svg></div>
+      <h3>${sy||q||activeType!=='all'?'No results':'No enrollment records yet'}</h3>
+      <p>${sy||q||activeType!=='all'?'Try adjusting your filters.':'Click <strong>Add Record</strong> to get started.'}</p>
+      ${!(sy||q||activeType!=='all')?`<button class="btn btn-gold btn-sm" onclick="openAdd()"><svg class="icon"><use href="#ico-plus"/></svg>Add Record</button>`:`<button class="btn btn-ghost btn-sm" onclick="clearF()"><svg class="icon"><use href="#ico-x"/></svg>Clear Filters</button>`}
+    </div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(r=>{
+    const {m,f,grand}=total(r,activeType==='secondary'?'secondary':'elementary');
+    const cells=gl.map(g=>{
+      const mv=r[g.key+'_male']||0, fv=r[g.key+'_female']||0, tv=mv+fv;
+      return `<td class="num m-num">${mv||'<span class="td-nil">—</span>'}</td>`+
+             `<td class="num f-num">${fv||'<span class="td-nil">—</span>'}</td>`+
+             `<td class="num t-num">${tv||'<span class="td-nil">—</span>'}</td>`;
+    }).join('');
+    return `<tr>
+      <td class="td-school" title="${esc(r.schoolName)}">${esc(r.schoolName)||'—'}</td>
+      <td class="td-sy">${esc(r.schoolYear)||'—'}</td>
+      ${cells}
+      <td class="num gm-num">${m.toLocaleString()}</td>
+      <td class="num gf-num">${f.toLocaleString()}</td>
+      <td class="num gt-num">${grand.toLocaleString()}</td>
+      <td class="td-act"><div class="act-group">
+        <button class="btn btn-outline-blue btn-sm btn-icon" title="Edit" onclick="openEdit(${r.id})"><svg class="icon"><use href="#ico-edit"/></svg></button>
+        <button class="btn btn-outline-danger btn-sm btn-icon" title="Delete" onclick="openDel(${r.id})"><svg class="icon"><use href="#ico-trash"/></svg></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function clearF(){document.getElementById('sy-filter').value='';document.getElementById('q-input').value='';render();}
+
+// ── Form helpers ───────────────────────────────────────────────
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeM(o.id);}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>closeM(m.id));});
+
+function buildGradeRows() {
+  const c = document.getElementById('grade-rows');
+  c.innerHTML = GRADES.map(g=>`
+    <div class="eg-row">
+      <div class="eg-label"><span class="eg-dot" style="background:${g.color}"></span>${g.label}</div>
+      <div class="eg-cell"><input type="number" min="0" id="g-${g.key}-m" class="mi" placeholder="0" oninput="recalc()"></div>
+      <div class="eg-cell"><input type="number" min="0" id="g-${g.key}-f" class="fi" placeholder="0" oninput="recalc()"></div>
+      <div class="eg-cell"><input type="text" id="g-${g.key}-t" readonly placeholder="0"></div>
+    </div>`).join('');
+}
+
+function gn(id){return parseInt(document.getElementById(id)?.value||'0')||0;}
+function recalc(){
+  let tm=0,tf=0;
+  GRADES.forEach(g=>{
+    const m=gn(`g-${g.key}-m`),f=gn(`g-${g.key}-f`);
+    const el=document.getElementById(`g-${g.key}-t`);
+    if(el)el.value=m+f||'';
+    tm+=m;tf+=f;
+  });
+  document.getElementById('tot-m').value=tm||'';
+  document.getElementById('tot-f').value=tf||'';
+  document.getElementById('tot-g').value=tm+tf||'';
+}
+function clearForm(){
+  document.getElementById('f-sy').value='';
+  document.getElementById('f-name').value='';
+  GRADES.forEach(g=>{
+    ['m','f','t'].forEach(s=>{const el=document.getElementById(`g-${g.key}-${s}`);if(el)el.value='';});
+  });
+  ['tot-m','tot-f','tot-g'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+function setForm(r){
+  document.getElementById('f-sy').value=r.schoolYear||'';
+  document.getElementById('f-name').value=r.schoolName||'';
+  GRADES.forEach(g=>{
+    const me=document.getElementById(`g-${g.key}-m`),fe=document.getElementById(`g-${g.key}-f`);
+    if(me)me.value=r[g.key+'_male']||'';
+    if(fe)fe.value=r[g.key+'_female']||'';
+  });
+  recalc();
+}
+function getForm(){
+  const d={schoolYear:document.getElementById('f-sy').value.trim(),schoolName:document.getElementById('f-name').value.trim()};
+  GRADES.forEach(g=>{
+    d[g.key+'_male']  =parseInt(document.getElementById(`g-${g.key}-m`)?.value)||0;
+    d[g.key+'_female']=parseInt(document.getElementById(`g-${g.key}-f`)?.value)||0;
+    d.grade7_male=d.grade7_male||0; d.grade7_female=d.grade7_female||0;
+    d.grade8_male=d.grade8_male||0; d.grade8_female=d.grade8_female||0;
+    d.grade9_male=d.grade9_male||0; d.grade9_female=d.grade9_female||0;
+    d.grade10_male=d.grade10_male||0; d.grade10_female=d.grade10_female||0;
+    d.grade11_male=d.grade11_male||0; d.grade11_female=d.grade11_female||0;
+    d.grade12_male=d.grade12_male||0; d.grade12_female=d.grade12_female||0;
+  });
+  d.schoolType='elementary';
+  return d;
+}
+
+function hl(id){const el=document.getElementById(id);if(!el)return;el.focus();el.style.borderColor='var(--red)';setTimeout(()=>el.style.borderColor='',1800);}
+
+function openAdd(){
+  editId=null;clearForm();
+  document.getElementById('m-title').textContent='Add Enrollment Record';
+  document.getElementById('save-btn').innerHTML='<svg class="icon"><use href="#ico-check"/></svg> Save Record';
+  openM('m-form');
+  setTimeout(()=>document.getElementById('f-sy').focus(),100);
+}
+function openEdit(id){
+  const r=records.find(x=>x.id===id);if(!r)return;
+  editId=id;setForm(r);
+  document.getElementById('m-title').textContent='Edit — '+(r.schoolName||'');
+  document.getElementById('save-btn').innerHTML='<svg class="icon"><use href="#ico-check"/></svg> Update Record';
+  openM('m-form');
+}
+async function saveRec(){
+  const d=getForm();
+  if(!d.schoolYear){hl('f-sy');return;}
+  if(!d.schoolName){hl('f-name');return;}
+  const btn=document.getElementById('save-btn');btn.disabled=true;
+  try{
+    if(window.api){
+      if(editId===null){const r=await window.api.enrollmentAdd(d);d.id=r.id;records.push(d);toast('Record added.');}
+      else{await window.api.enrollmentUpdate(editId,d);const i=records.findIndex(r=>r.id===editId);if(i!==-1)records[i]={...records[i],...d};toast('Record updated.');}
+    }else{
+      if(editId===null){d.id=Date.now();records.push(d);toast('Added (preview).');}
+      else{const i=records.findIndex(r=>r.id===editId);if(i!==-1)records[i]={...records[i],...d};toast('Updated (preview).');}
+    }
+    closeM('m-form');populateSY();render();
+  }catch(e){alert('Error: '+e.message);}finally{btn.disabled=false;}
+}
+
+function openDel(id){
+  deleteId=id;
+  const r=records.find(x=>x.id===id);
+  document.getElementById('del-msg').textContent=`Delete enrollment record for "${r?(r.schoolName+' ('+r.schoolYear+')'):'this record'}"? This cannot be undone.`;
+  openM('m-del');
+}
+async function confirmDel(){
+  if(window.api)await window.api.enrollmentDelete(deleteId);
+  records=records.filter(r=>r.id!==deleteId);
+  closeM('m-del');populateSY();render();toast('Record deleted.');
+}
+
+async function doExport(){
+  if(!records.length){alert('No records to export.');return;}
+  if(window.api){const r=await window.api.enrollmentExportCSV();if(r&&r.success)toast('CSV exported.');}
+}
+
+// Toast
+let toastT;
+function toast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+init();
+</script>
+</body>
+</html>
